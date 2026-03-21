@@ -665,6 +665,7 @@ function loadGame(){
     S.currentLiquid=d.currentLiquid||'water';
     S.currentHose=d.currentHose||'garden';
     S.prestigeCount=d.prestigeCount||0;
+    S.prestigedThisRun=false;
     if(d.upgrades)Object.assign(S.upgrades,d.upgrades);
     if(d.liquids)Object.assign(S.liquids,d.liquids);
     if(d.hoses)Object.assign(S.hoses,d.hoses);
@@ -1377,17 +1378,18 @@ function buildShop(){
 function buildUpgradesTab(){
   const el=$('tab-upgrades');el.innerHTML='';
 
-  // Prestige reset — unlocks at 1 quadrillion lifetime driplets
-  if(S.lifeDrip>=1e15){
-    const pc=S.prestigeCount||0;
-    const nextMult=Math.pow(2,pc+1);
+  // Prestige — available when you've spent enough THIS run (threshold scales per prestige)
+  const pc = S.prestigeCount||0;
+  const prestigeThreshold = 1e14 * Math.pow(10, pc); // 100T first time, 1Qa second, etc.
+  if(S.totalSpent >= prestigeThreshold){
+    const nextMult = Math.pow(2, pc+1);
     const sec=document.createElement('div');sec.className='sec-lbl';sec.textContent='⚡ Prestige';el.appendChild(sec);
     const box=document.createElement('div');
     box.style.cssText='background:#1a0a00;border:1px solid #ff660055;border-radius:8px;padding:10px 12px;margin-bottom:8px;';
     box.innerHTML=`<div style="font-size:12px;font-weight:700;color:#ff8800">🔁 PRESTIGE RESET</div>
-      <div style="font-size:10px;color:#9090c0;margin-top:3px">Reset driplets &amp; upgrades. Keep liquids, pipes &amp; achievements.</div>
-      <div style="font-size:11px;color:var(--gold);margin-top:5px">Next bonus: <b>×${fmt(nextMult)} permanent income</b></div>
-      <div style="font-size:10px;color:var(--muted)">Current: ×${fmt(Math.pow(2,pc))} (Prestige ${pc})</div>`;
+      <div style="font-size:10px;color:#9090c0;margin-top:3px">Resets everything including pipe &amp; liquid.<br>Keeps only achievements.</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:5px">Reward: <b>×${fmt(nextMult)} permanent income</b></div>
+      <div style="font-size:10px;color:var(--muted)">Current bonus: ×${fmt(Math.pow(2,pc))} — Prestige ${pc}</div>`;
     const pbtn=document.createElement('button');
     pbtn.style.cssText='margin-top:8px;width:100%;background:#ff440022;border:1px solid #ff4400aa;border-radius:6px;padding:8px;color:#ff6600;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;cursor:pointer;';
     pbtn.textContent='⚡ PRESTIGE NOW';
@@ -1459,9 +1461,10 @@ function buildLiquidsTab(){
 }
 
 function doPrestige(){
-  if(!confirm('Prestige reset? Lose driplets & upgrades, keep liquids/pipes/achievements, gain permanent income multiplier.')) return;
+  if(!confirm('Prestige reset? You will lose driplets, upgrades, current liquid & pipe. You keep achievements and gain a permanent income bonus.')) return;
   S.prestigeCount = (S.prestigeCount||0) + 1;
-  // Reset progress
+  S.prestigedThisRun = false; // must re-earn the threshold next run
+  // Reset progress fully — including hose and liquid
   S.driplets = 0;
   S.score = 0;
   S.totalSpent = 0;
@@ -1470,10 +1473,14 @@ function doPrestige(){
   S.puddle.maxRadius = 200;
   S.combo = 0; S.comboTimer = 0;
   S.plug = null;
-  UPGRADES.forEach(u=>S.upgrades[u.id]=0);
-  // Keep: lifeDrip, liquids, hoses, achievements, prestigeCount
+  S.currentLiquid = 'water';
+  S.currentHose = 'garden';
+  // Reset all liquid/hose unlocks except water/garden
+  Object.keys(S.liquids).forEach(k => S.liquids[k] = k==='water');
+  HOSES.forEach(h => S.hoses[h.id] = h.id==='garden');
+  UPGRADES.forEach(u => S.upgrades[u.id] = 0);
   updateHUD(); buildShop(); checkMilestones();
-  floatTxt(canvas.width/2, canvas.height/2, `⚡ PRESTIGE ${S.prestigeCount}!`, '#ff8800');
+  floatTxt(canvas.width/2, canvas.height/2 - 40, `⚡ PRESTIGE ${S.prestigeCount}!`, '#ff8800');
   saveGame();
 }
 
