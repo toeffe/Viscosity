@@ -690,7 +690,7 @@ function dropRadius(){
   const raw=(4+upg('size')*1.2)*liq().sz*Math.sqrt(hose().dmult)*(1+upg('gravity')*.10)*genesisBonus();
   return clamp(raw,3,22);
 }
-function prestigeBonus(){return Math.pow(2,S.prestigeCount||0);}
+function prestigeBonus(){return Math.pow(1.5,S.prestigeCount||0);}
 function dropValue(){
   const h=hose(),l=liq();
   const vm=1+upg('value')*.38,szm=1+upg('size')*.12,spm=1+upg('splash')*.10;
@@ -1380,16 +1380,16 @@ function buildUpgradesTab(){
 
   // Prestige — available when you've spent enough THIS run (threshold scales per prestige)
   const pc = S.prestigeCount||0;
-  const prestigeThreshold = 1e14 * Math.pow(10, pc); // 100T first time, 1Qa second, etc.
+  const prestigeThreshold = 1e14 * Math.pow(1000, pc); // 100T first time, 1Qa second, etc.
   if(S.totalSpent >= prestigeThreshold){
-    const nextMult = Math.pow(2, pc+1);
+    const nextMult = Math.pow(1.5, pc+1);
     const sec=document.createElement('div');sec.className='sec-lbl';sec.textContent='⚡ Prestige';el.appendChild(sec);
     const box=document.createElement('div');
     box.style.cssText='background:#1a0a00;border:1px solid #ff660055;border-radius:8px;padding:10px 12px;margin-bottom:8px;';
     box.innerHTML=`<div style="font-size:12px;font-weight:700;color:#ff8800">🔁 PRESTIGE RESET</div>
       <div style="font-size:10px;color:#9090c0;margin-top:3px">Resets everything including pipe &amp; liquid.<br>Keeps only achievements.</div>
       <div style="font-size:11px;color:var(--gold);margin-top:5px">Reward: <b>×${fmt(nextMult)} permanent income</b></div>
-      <div style="font-size:10px;color:var(--muted)">Current bonus: ×${fmt(Math.pow(2,pc))} — Prestige ${pc}</div>`;
+      <div style="font-size:10px;color:var(--muted)">Current bonus: ×${fmt(Math.pow(1.5,pc))} — Prestige ${pc}</div>`;
     const pbtn=document.createElement('button');
     pbtn.style.cssText='margin-top:8px;width:100%;background:#ff440022;border:1px solid #ff4400aa;border-radius:6px;padding:8px;color:#ff6600;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;cursor:pointer;';
     pbtn.textContent='⚡ PRESTIGE NOW';
@@ -1484,7 +1484,7 @@ function doPrestige(){
   saveGame();
 }
 
-function prestigeBonus(){ return Math.pow(2, S.prestigeCount||0); }
+
 
 function buildAchTab(){
   const el=$('tab-ach');el.innerHTML='';
