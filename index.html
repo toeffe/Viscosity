@@ -532,7 +532,7 @@ const S = {
   hoseBend:0, hoseBendVel:0,
   hoseBaseX:0, hoseBaseY:-10, hoseLen:170,
   nozzleX:0, nozzleY:0,
-  drops:[], particles:[], splashes:[],
+  drops:[], particles:[], splashes:[], floaters:[],
   plug:null, dropPressure:0,
   _shopTimer:0, _saveTimer:0, _milTimer:0,
   // Secret achievement trackers
@@ -696,29 +696,46 @@ function multiChance(){return Math.min(upg('multidrip')*.07,.85);}
 function visible(revealAt){return(S.totalSpent||0)>=revealAt;}
 
 // ════════════════════════════════════════════════════════
-// PARTICLES & FLOATERS
+// PARTICLES & FLOATERS — all canvas-rendered, hard capped
 // ════════════════════════════════════════════════════════
-function splash(x,y,liq,n){
-  for(let i=0;i<n;i++){
-    const a=rnd(0,Math.PI*2),spd=rnd(1.5,5);
-    S.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-rnd(2,4),
-      r:rnd(1.5,3.5),life:1,decay:rnd(.03,.06),col:liq.color});
+const MAX_PARTICLES = 120;
+const MAX_SPLASHES  = 20;
+const MAX_RINGS     = 15;
+const MAX_FLOATERS  = 20;
+
+// Canvas-rendered floaters — no DOM elements
+S.floaters = [];
+
+function splash(x,y,liqObj,n){
+  // Cap incoming particles
+  const space = MAX_PARTICLES - S.particles.length;
+  const count = Math.min(n, space, 6);
+  for(let i=0;i<count;i++){
+    const a=rnd(0,Math.PI*2),spd=rnd(1.5,4);
+    S.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-rnd(1.5,3.5),
+      r:rnd(1.5,3),life:1,decay:rnd(.04,.08),col:liqObj.color});
   }
-  S.splashes.push({x,y,r:4,maxR:35,life:1,col:liq.color});
+  if(S.splashes.length < MAX_SPLASHES)
+    S.splashes.push({x,y,r:4,maxR:30,life:1,col:liqObj.color});
 }
+
+// Throttle: only show a floater every N ms per position to avoid flood
+let _lastFloatTime = 0;
 function floatTxt(x,y,txt,col){
-  const el=document.createElement('div');
-  el.className='floater';
-  el.style.cssText=`left:${x}px;top:${y}px;color:${col};`;
-  el.textContent=txt;
-  $('floaters').appendChild(el);
-  setTimeout(()=>el.remove(),1050);
+  const now = Date.now();
+  // Allow drain text always; throttle drop earn text to max ~12/sec
+  const isDrain = txt.includes('DRAINED');
+  if(!isDrain && now - _lastFloatTime < 80) return;
+  _lastFloatTime = now;
+  if(S.floaters.length >= MAX_FLOATERS) S.floaters.shift();
+  S.floaters.push({x, y, txt, col, life:1, vy:-1.2});
 }
 
 // ════════════════════════════════════════════════════════
 // DROP PHYSICS
 // ════════════════════════════════════════════════════════
 function spawnDrop(fromAuto=false){
+  if(S.drops.length > 60) return; // hard cap — physics gets too heavy above this
   const l=liq(),w=wiggle();
   const vx=S.hoseBendVel*.35+rnd(-1.5,1.5)*l.spread*w;
   const vy=Math.max(.4,rnd(.8,2.2)-upg('gravity')*.07);
@@ -901,6 +918,12 @@ function update(ts){
     sp.r+=(sp.maxR-sp.r)*.12;sp.life-=.055;
     if(sp.life<=0)S.splashes.splice(i,1);
   }
+  // Canvas floaters
+  for(let i=S.floaters.length-1;i>=0;i--){
+    const f=S.floaters[i];
+    f.y+=f.vy;f.life-=.025;
+    if(f.life<=0)S.floaters.splice(i,1);
+  }
 
   // Periodic tasks
   S._shopTimer+=dt;if(S._shopTimer>4000){S._shopTimer=0;buildShop();}
@@ -989,17 +1012,33 @@ function triggerDrainFX(){
 }
 
 function triggerHitFX(x, y, col, combo){
-  // Shockwave ring at hit point
-  FX.pulseRings.push({x, y, r:4, maxR:clamp(20+combo*.5, 20, 90), life:1, col});
-  // Burst particles on big combos
-  if(combo>10){
-    const n = Math.min(combo, 30);
+  if(FX.pulseRings.length < MAX_RINGS)
+    FX.pulseRings.push({x, y, r:4, maxR:clamp(20+combo*.4, 20, 70), life:1, col});
+  // Only burst particles at meaningful combo milestones, capped hard
+  if(combo>0 && combo%10===0){
+    const n = Math.min(8, MAX_PARTICLES - S.particles.length);
     for(let i=0;i<n;i++){
-      const a=rnd(0,Math.PI*2), spd=rnd(2,6+combo*.05);
-      S.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-rnd(1,4),
-        r:rnd(2,5),life:1,decay:rnd(.02,.05),col});
+      const a=rnd(0,Math.PI*2), spd=rnd(2,5);
+      S.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-rnd(1,3),
+        r:rnd(2,4),life:1,decay:rnd(.03,.06),col});
     }
   }
+}
+
+function drawFloaters(){
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='bold 15px "Bebas Neue",sans-serif';
+  for(const f of S.floaters){
+    ctx.globalAlpha = f.life;
+    ctx.fillStyle = f.col;
+    ctx.shadowColor = f.col;
+    ctx.shadowBlur = 6;
+    ctx.fillText(f.txt, f.x, f.y);
+  }
+  ctx.shadowBlur=0;
+  ctx.globalAlpha=1;
+  ctx.restore();
 }
 
 function draw(){
@@ -1016,6 +1055,7 @@ function draw(){
   drawDrops();
   drawHose();
   drawPlug();
+  drawFloaters();
   drawVignette();
   drawFlash();
 
