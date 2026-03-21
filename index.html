@@ -240,8 +240,11 @@ canvas{position:absolute;top:0;left:0;display:block;}
   <div class="stat"><div class="stat-lbl">Driplets 💧</div><div class="stat-val gold" id="h-drip">0</div></div>
   <div class="stat"><div class="stat-lbl">Puddle</div><div class="stat-val green" id="h-puddle">0%</div></div>
   <div class="stat"><div class="stat-lbl">Level</div><div class="stat-val" id="h-level">1</div></div>
+  <div style="margin-left:auto;pointer-events:none;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px;color:var(--accent);opacity:.35;line-height:1;">VISCOSITY</div>
+  </div>
 </div>
-<div id="combo-wrap"><div id="combo-txt">DRIP ×0</div><div id="combo-sub">combo</div></div>
+<div id="combo-wrap"><div id="combo-txt">FLOW ×0</div><div id="combo-sub">combo</div></div>
 <div id="floaters"></div>
 <div id="toast-area"></div>
 <div id="cur"></div>
@@ -606,7 +609,7 @@ window.addEventListener('resize',resize);
 // ════════════════════════════════════════════════════════
 // SAVE / LOAD
 // ════════════════════════════════════════════════════════
-const SAVE_KEY='drip_v3';
+const SAVE_KEY='viscosity_v1';
 function saveGame(){
   const d={
     score:S.score,driplets:S.driplets,lifeDrip:S.lifeDrip,
@@ -907,7 +910,7 @@ function update(ts){
   // Combo display
   if(S.combo>=3){
     $('combo-wrap').style.opacity='1';
-    $('combo-txt').textContent=`DRIP ×${S.combo}`;
+    $('combo-txt').textContent=`FLOW ×${S.combo}`;
     $('combo-txt').style.fontSize=Math.min(30+S.combo*.8,72)+'px';
   }
 }
@@ -1409,20 +1412,30 @@ function handleClick(cx,cy){
   const px=S.plug.x,py=S.plug.y+S.plug.bob;
   if(Math.sqrt((p.x-px)**2+(p.y-py)**2)<36){S.plug.draining=true;S.mouseHeld=false;}
 }
+function onCanvas(cx,cy){
+  const r=canvas.getBoundingClientRect();
+  return cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom;
+}
 window.addEventListener('mousemove',e=>handleMove(e.clientX,e.clientY));
 window.addEventListener('mousedown',e=>{
   handleClick(e.clientX,e.clientY);
   const r=canvas.getBoundingClientRect();
-  if(e.clientX<r.right){S.mouseHeld=true;handleMove(e.clientX,e.clientY);}});
+  if(e.clientX<r.right){S.mouseHeld=true;handleMove(e.clientX,e.clientY);}
+});
 window.addEventListener('mouseup',()=>{S.mouseHeld=false;});
 window.addEventListener('mouseleave',()=>{S.mouseHeld=false;});
-window.addEventListener('touchstart',e=>{
+
+// Touch on canvas only — panel handles its own scroll natively
+canvas.addEventListener('touchstart',e=>{
   handleClick(e.touches[0].clientX,e.touches[0].clientY);
-  S.mouseHeld=true;handleMove(e.touches[0].clientX,e.touches[0].clientY);
+  S.mouseHeld=true;
+  handleMove(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:true});
-window.addEventListener('touchmove',e=>{
-  e.preventDefault();handleMove(e.touches[0].clientX,e.touches[0].clientY);
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  handleMove(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
+canvas.addEventListener('touchend',()=>{S.mouseHeld=false;});
 window.addEventListener('touchend',()=>{S.mouseHeld=false;});
 
 // ════════════════════════════════════════════════════════
