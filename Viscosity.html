@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viscosity</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#070710;--surf:#0e0e1e;--surf2:#12122a;
+  --border:#252545;--border2:#353565;
+  --text:#dde0ff;--muted:#7070a0;--dim:#3a3a6a;
+  --accent:#00d4ff;--gold:#ffc800;--green:#00e676;--red:#ff4444;
+  --tab-h:38px;
+}
+body{background:var(--bg);font-family:'Space Mono',monospace;color:var(--text);overflow:hidden;height:100vh;width:100vw;cursor:none;}
+canvas{position:absolute;top:0;left:0;display:block;}
+
+/* ── HUD ───────────────────────────────────────────────────── */
+#hud{
+  position:absolute;top:0;left:0;right:300px;
+  padding:12px 18px;display:flex;align-items:flex-start;gap:28px;
+  pointer-events:none;z-index:20;
+  background:linear-gradient(to bottom,#070710ee 60%,transparent);
+}
+.stat{display:flex;flex-direction:column;gap:1px;}
+.stat-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;color:var(--accent);}
+.stat-val.gold{color:var(--gold);}
+.stat-val.green{color:var(--green);}
+
+/* ── COMBO ─────────────────────────────────────────────────── */
+#combo-wrap{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  pointer-events:none;z-index:30;text-align:center;opacity:0;
+  transition:opacity .25s;
+}
+#combo-txt{
+  font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--gold);
+  text-shadow:0 2px 20px #ffc80066;line-height:1;
+}
+#combo-sub{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+
+/* ── SHOP PANEL ────────────────────────────────────────────── */
+#panel{
+  position:absolute;top:0;right:0;bottom:0;width:300px;
+  background:var(--surf);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:20;
+}
+#panel-header{
+  padding:12px 14px 0;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+#panel-title{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);
+}
+#panel-sub{font-size:10px;color:var(--muted);margin:2px 0 10px;letter-spacing:1px;}
+
+/* Tabs */
+#tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
+.tab{
+  flex:1;height:var(--tab-h);background:none;border:none;
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;
+  color:var(--muted);cursor:pointer;text-transform:uppercase;
+  border-bottom:2px solid transparent;transition:color .15s,border-color .15s;
+}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+#panel-body{flex:1;overflow-y:auto;padding:10px;}
+#panel-body::-webkit-scrollbar{width:4px;}
+#panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.sec-lbl{
+  font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
+  margin:10px 0 5px;padding-bottom:5px;border-bottom:1px solid var(--border);
+}
+.sec-lbl:first-child{margin-top:2px;}
+
+/* Upgrade buttons */
+.upg{
+  background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 11px;cursor:pointer;text-align:left;width:100%;
+  font-family:'Space Mono',monospace;color:var(--text);margin-bottom:5px;
+  transition:border-color .15s,background .15s,transform .08s;
+}
+.upg:hover:not([disabled]){background:#18182e;border-color:var(--border2);transform:translateY(-1px);}
+.upg:active:not([disabled]){transform:translateY(0);}
+.upg[disabled]{opacity:.28;cursor:not-allowed;}
+.upg.can{border-color:#ffc80055;background:#161404;}
+.upg.can:hover{border-color:#ffc800aa;background:#1e1c06;}
+.upg.maxed{border-color:#00d4ff33;opacity:.45;cursor:not-allowed;}
+.upg-top{display:flex;justify-content:space-between;align-items:baseline;}
+.upg-name{font-size:12px;font-weight:700;color:#eeeeff;}
+.upg-lvl{font-size:10px;color:var(--muted);}
+.upg-desc{font-size:11px;color:#9090c0;margin-top:3px;}
+.upg-bar{height:3px;background:#1e1e3a;border-radius:2px;margin:6px 0 4px;overflow:hidden;}
+.upg-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+.upg-cost{font-size:12px;color:var(--gold);font-weight:700;}
+
+/* Liquid / Hose tiles */
+.tile{
+  background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 11px;cursor:pointer;width:100%;text-align:left;
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--text);
+  margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;
+  transition:all .15s;
+}
+.tile:hover{border-color:var(--border2);background:#18182e;}
+.tile.active{border-color:var(--accent);background:#001c22;color:var(--accent);}
+.tile.locked{opacity:.32;}
+.tile-left{display:flex;align-items:center;gap:9px;}
+.tile-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.tile-name{font-size:11px;font-weight:700;}
+.tile-right{text-align:right;font-size:10px;color:var(--muted);line-height:1.5;}
+.tile-right .sub{font-size:10px;color:var(--gold);}
+
+/* Achievements */
+.ach{
+  padding:8px 10px;border-radius:7px;border:1px solid var(--border);
+  background:var(--surf2);margin-bottom:5px;
+}
+.ach.got{border-color:#ffc80044;background:#191700;}
+.ach-name{font-size:11px;font-weight:700;color:#888;}
+.ach.got .ach-name{color:var(--gold);}
+.ach-desc{font-size:10px;color:var(--dim);margin-top:2px;}
+.ach-prog{font-size:9px;color:var(--muted);margin-top:3px;}
+.ach-count{font-size:10px;color:var(--muted);margin-bottom:6px;}
+
+/* ── FLOATERS ──────────────────────────────────────────────── */
+#floaters{position:absolute;inset:0;pointer-events:none;z-index:25;overflow:hidden;}
+.floater{
+  position:absolute;font-family:'Bebas Neue',sans-serif;font-size:19px;
+  pointer-events:none;transform:translateX(-50%);
+  text-shadow:0 1px 6px #00000099;
+  animation:fup 1s ease-out forwards;
+}
+@keyframes fup{
+  0%{opacity:1;transform:translateX(-50%) translateY(0);}
+  100%{opacity:0;transform:translateX(-50%) translateY(-55px);}
+}
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+#toast-area{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;}
+.toast{
+  background:var(--surf2);border:1px solid #ffc80066;border-radius:10px;
+  padding:11px 20px;text-align:center;margin-top:8px;
+  box-shadow:0 4px 28px #00000099;
+  animation:tslide .4s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+@keyframes tslide{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.toast-tag{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.toast-name{font-size:14px;font-weight:700;color:#fff;margin-top:3px;}
+.toast-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ── CURSOR ────────────────────────────────────────────────── */
+#cur{
+  position:fixed;width:11px;height:11px;border:2px solid var(--accent);
+  border-radius:50%;pointer-events:none;z-index:100;
+  transform:translate(-50%,-50%);mix-blend-mode:screen;
+}
+
+/* ── SAVE INDICATOR ────────────────────────────────────────── */
+#save-ind{
+  position:absolute;bottom:10px;left:10px;font-size:9px;
+  color:var(--dim);letter-spacing:1px;pointer-events:none;z-index:30;
+  transition:opacity .5s;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="stat"><div class="stat-lbl">Score</div><div class="stat-val" id="h-score">0</div></div>
+  <div class="stat"><div class="stat-lbl">Driplets 💧</div><div class="stat-val gold" id="h-drip">0</div></div>
+  <div class="stat"><div class="stat-lbl">Puddle</div><div class="stat-val green" id="h-puddle">0%</div></div>
+  <div class="stat"><div class="stat-lbl">Level</div><div class="stat-val" id="h-level">1</div></div>
+</div>
+<div id="combo-wrap"><div id="combo-txt">DRIP ×0</div><div id="combo-sub">combo</div></div>
+<div id="floaters"></div>
+<div id="toast-area"></div>
+<div id="cur"></div>
+<div id="save-ind">⬡ auto-save</div>
+
+<div id="panel">
+  <div id="panel-header">
+    <div id="panel-title">DRIP SHOP</div>
+    <div id="panel-sub">spend driplets · unlock · dominate</div>
+    <div id="tabs">
+      <button class="tab active" onclick="switchTab('upgrades')">⚙ Upgrades</button>
+      <button class="tab" onclick="switchTab('pipes')">🔧 Pipes</button>
+      <button class="tab" onclick="switchTab('liquids')">💧 Liquids</button>
+      <button class="tab" onclick="switchTab('ach')">🏆 Achs</button>
+    </div>
+  </div>
+  <div id="panel-body">
+    <div id="tab-upgrades"></div>
+    <div id="tab-pipes" style="display:none"></div>
+    <div id="tab-liquids" style="display:none"></div>
+    <div id="tab-ach" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const rnd = (a,b) => Math.random()*(b-a)+a;
+const clamp = (v,lo,hi) => Math.max(lo,Math.min(hi,v));
+const lerp = (a,b,t) => a+(b-a)*t;
+const dst = (ax,ay,bx,by) => Math.sqrt((ax-bx)**2+(ay-by)**2);
+
+// Infinite number formatting — handles up to e300+
+const SUFFIXES = [
+  '','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc',
+  'UDc','DDc','TDc','QaDc','QiDc','SxDc','SpDc','OcDc','NoDc','Vg',
+  'UVg','DVg','TVg','QaVg','QiVg','SxVg','SpVg','OcVg','NoVg','Tg',
+];
+function fmt(n) {
+  if (isNaN(n)||!isFinite(n)) return '∞';
+  if (n < 1000) return Math.floor(n).toString();
+  const e = Math.floor(Math.log10(Math.abs(n)));
+  const tier = Math.floor(e/3);
+  if (tier < SUFFIXES.length) {
+    const scaled = n / Math.pow(10, tier*3);
+    return scaled.toFixed(tier > 6 ? 0 : 2) + SUFFIXES[tier];
+  }
+  return n.toExponential(2);
+}
+
+// ════════════════════════════════════════════════════════
+// DATA — LIQUIDS
+// ════════════════════════════════════════════════════════
+const LIQUIDS = {
+  water:      {name:'Water',        emoji:'💧',color:'#29b6f6',puddle:'#1565c0',pLight:'#1e88e530',gravity:.38,spread:1.0, mult:1,    sz:1.0, bounce:.0,  cost:0,         revealAt:0,        desc:'Baseline · reliable'},
+  oil:        {name:'Oil',          emoji:'🫙',color:'#ffb300',puddle:'#5d4037',pLight:'#78460430',gravity:.16,spread:1.9, mult:1.8,  sz:1.3, bounce:.25, cost:800,       revealAt:0,        desc:'×1.8 · spreads wide'},
+  neon:       {name:'Neon Goo',     emoji:'🟢',color:'#00e676',puddle:'#1b5e20',pLight:'#00e67630',gravity:.42,spread:1.1, mult:2.5,  sz:.85, bounce:.45, cost:5000,      revealAt:500,      desc:'×2.5 · bouncy'},
+  lava:       {name:'Lava',         emoji:'🌋',color:'#ff5722',puddle:'#b71c1c',pLight:'#ff572230',gravity:.60,spread:.65, mult:4,    sz:1.9, bounce:.0,  cost:20000,     revealAt:3000,     desc:'×4 · massive drops'},
+  slime:      {name:'Slime',        emoji:'🟡',color:'#aeea00',puddle:'#33691e',pLight:'#aeea0030',gravity:.22,spread:.80, mult:6,    sz:1.5, bounce:.60, cost:80000,     revealAt:15000,    desc:'×6 · super bouncy'},
+  mercury:    {name:'Mercury',      emoji:'⚗️',color:'#b0bec5',puddle:'#546e7a',pLight:'#b0bec530',gravity:.90,spread:.50, mult:10,   sz:2.2, bounce:.0,  cost:320000,    revealAt:60000,    desc:'×10 · ultra heavy'},
+  quantum:    {name:'Quantum Goo',  emoji:'🌀',color:'#e040fb',puddle:'#4a148c',pLight:'#e040fb30',gravity:.30,spread:2.5, mult:20,   sz:1.0, bounce:.80, cost:1200000,   revealAt:250000,   desc:'×20 · teleports'},
+  void:       {name:'Void Essence', emoji:'🖤',color:'#78909c',puddle:'#1a1a2e',pLight:'#78909c30',gravity:.05,spread:3.5, mult:45,   sz:.70, bounce:.90, cost:6000000,   revealAt:1500000,  desc:'×45 · defies gravity'},
+  starplasm:  {name:'Star Plasm',   emoji:'⭐',color:'#fff176',puddle:'#f57f17',pLight:'#fff17630',gravity:.45,spread:1.8, mult:100,  sz:1.2, bounce:.50, cost:25000000,  revealAt:8000000,  desc:'×100 · stellar'},
+  chronofluid:{name:'Chrono Fluid', emoji:'⏳',color:'#80cbc4',puddle:'#004d40',pLight:'#80cbc430',gravity:.70,spread:.40, mult:250,  sz:2.8, bounce:.0,  cost:1e8,       revealAt:4e7,      desc:'×250 · bends time'},
+  godwater:   {name:'God Water',    emoji:'🌊',color:'#e3f2fd',puddle:'#90caf9',pLight:'#e3f2fd30',gravity:.50,spread:2.0, mult:1000, sz:1.5, bounce:.70, cost:5e8,       revealAt:2e8,      desc:'×1000 · divine'},
+  abyss:      {name:'Abyss',        emoji:'🌑',color:'#4a148c',puddle:'#0d0018',pLight:'#4a148c30',gravity:-.1,spread:4.0, mult:5000, sz:.60, bounce:1.0, cost:5e9,       revealAt:2e9,      desc:'×5000 · falls UP'},
+  cosmicmilk: {name:'Cosmic Milk',  emoji:'🌌',color:'#f8f8ff',puddle:'#7986cb',pLight:'#f8f8ff30',gravity:.55,spread:2.2, mult:25000,sz:1.8, bounce:.40, cost:5e10,      revealAt:2e10,     desc:'×25K · galactic'},
+  infinidrop: {name:'Infinidrop',   emoji:'♾️',color:'#ffd700',puddle:'#ff8f00',pLight:'#ffd70030',gravity:.50,spread:1.5, mult:1e6,  sz:1.0, bounce:.50, cost:1e13,      revealAt:5e12,     desc:'×1M · the end game liquid'},
+};
+
+// ════════════════════════════════════════════════════════
+// DATA — HOSES
+// ════════════════════════════════════════════════════════
+const HOSES = [
+  {id:'garden',     name:'Garden Hose',      icon:'🪣', desc:'Standard issue',             cost:0,        flow:1.0, dmult:1.0,  col:'#3a3a6a',hi:'#6060aa',revealAt:0       },
+  {id:'copper',     name:'Copper Pipe',       icon:'🔩', desc:'+50% flow · +20% value',     cost:1200,     flow:1.5, dmult:1.2,  col:'#b5651d',hi:'#d4863a',revealAt:0       },
+  {id:'firehose',   name:'Fire Hose',         icon:'🚒', desc:'High volume output',          cost:7000,     flow:2.5, dmult:1.4,  col:'#c0392b',hi:'#e74c3c',revealAt:2000    },
+  {id:'iv',         name:'Drip IV Tube',      icon:'💉', desc:'Slow · very high value',      cost:28000,    flow:.50, dmult:4.0,  col:'#27ae60',hi:'#2ecc71',revealAt:8000    },
+  {id:'industrial', name:'Industrial Pipe',   icon:'🏭', desc:'Massive chaos output',        cost:120000,   flow:3.5, dmult:2.0,  col:'#7f8c8d',hi:'#95a5a6',revealAt:35000   },
+  {id:'diamond',    name:'Diamond Nozzle',    icon:'💎', desc:'Precision + high value',      cost:600000,   flow:2.5, dmult:6.0,  col:'#74b9ff',hi:'#a8d8ff',revealAt:150000  },
+  {id:'quantum',    name:'Quantum Pipe',      icon:'⚛️', desc:'Drops warp through space',    cost:3000000,  flow:4.0, dmult:10.0, col:'#a29bfe',hi:'#d6cffe',revealAt:800000  },
+  {id:'singularity',name:'Singularity Valve', icon:'🕳️', desc:'Infinite-density drips',      cost:15000000, flow:6.0, dmult:20.0, col:'#4527a0',hi:'#7c4dff',revealAt:5000000 },
+  {id:'omega',      name:'Omega Conduit',     icon:'♾️', desc:'The final pipe · max output', cost:80000000, flow:10.0,dmult:50.0, col:'#b8860b',hi:'#ffd700',revealAt:2.5e7  },
+  {id:'godpipe',    name:'God Pipe',          icon:'✨', desc:'Transcends physics itself',   cost:5e9,      flow:25.0,dmult:200.0,col:'#e3f2fd',hi:'#ffffff',revealAt:2e9    },
+];
+
+// ════════════════════════════════════════════════════════
+// DATA — UPGRADES
+// tier: 1=always, 2=mid, 3=late, 4=endgame, 5=beyond
+// ════════════════════════════════════════════════════════
+function mkCosts(base, factor, n) {
+  const c = [];
+  let v = base;
+  for (let i=0;i<n;i++){c.push(Math.round(v));v*=factor;}
+  return c;
+}
+const UPGRADES = [
+  // Tier 1
+  {id:'flow',      name:'Flow Rate',       desc:'Lower drop cost → more drops from wiggle', icon:'⚡',tier:1,revealAt:0,
+    costs:mkCosts(30,2.6,15),max:15},
+  {id:'size',      name:'Drop Size',       desc:'Bigger drops → more fill+value', icon:'💦',tier:1,revealAt:0,
+    costs:mkCosts(40,2.7,15),max:15},
+  {id:'value',     name:'Drop Value',      desc:'More driplets per drop',         icon:'💰',tier:1,revealAt:0,
+    costs:mkCosts(80,2.8,15),max:15},
+  {id:'auto',      name:'Auto-Drip',       desc:'Passive drip, no wiggle needed', icon:'🤖',tier:1,revealAt:0,
+    costs:mkCosts(200,3.0,12),max:12},
+  {id:'wiggle',    name:'Wiggle Amp',      desc:'Wiggling produces more drops faster', icon:'🌀',tier:1,revealAt:0,
+    costs:mkCosts(60,2.5,12),max:12},
+  // Tier 2
+  {id:'pressure',  name:'Water Pressure',  desc:'Drops fall faster',              icon:'💨',tier:2,revealAt:800,
+    costs:mkCosts(150,2.8,12),max:12},
+  {id:'combo',     name:'Combo Meter',     desc:'Longer combo window',            icon:'🔥',tier:2,revealAt:1500,
+    costs:mkCosts(250,2.9,12),max:12},
+  {id:'puddle',    name:'Puddle Magnet',   desc:'Drops pulled toward puddle',     icon:'🧲',tier:2,revealAt:3000,
+    costs:mkCosts(350,3.0,12),max:12},
+  {id:'splash',    name:'Splash Radius',   desc:'Bigger splashes = more score',   icon:'🌊',tier:2,revealAt:5000,
+    costs:mkCosts(300,2.8,12),max:12},
+  {id:'drain',     name:'Drain Bonus',     desc:'Bigger drain reward',            icon:'🛁',tier:2,revealAt:8000,
+    costs:mkCosts(600,3.1,12),max:12},
+  // Tier 3
+  {id:'multidrip', name:'Multi-Drip',      desc:'Chance to spawn extra drops',    icon:'✌️',tier:3,revealAt:50000,
+    costs:mkCosts(8000,3.2,12),max:12},
+  {id:'overflow',  name:'Overflow Mode',   desc:'Puddle overflow = ×2 bonus',     icon:'💥',tier:3,revealAt:120000,
+    costs:mkCosts(20000,3.3,12),max:12},
+  {id:'gravity',   name:'Anti-Gravity',    desc:'Drops hang longer, grow larger', icon:'🪐',tier:3,revealAt:300000,
+    costs:mkCosts(50000,3.4,12),max:12},
+  {id:'conductor', name:'Conductor',       desc:'Puddle magnet pulls harder',     icon:'⚡',tier:3,revealAt:600000,
+    costs:mkCosts(120000,3.5,12),max:12},
+  // Tier 4
+  {id:'prestige',  name:'Prestige Aura',   desc:'All income ×1.12 per level',     icon:'👑',tier:4,revealAt:1500000,
+    costs:mkCosts(500000,3.8,10),max:10},
+  {id:'timewarp',  name:'Time Warp',       desc:'Auto-drip fires 2× faster',      icon:'⌛',tier:4,revealAt:5000000,
+    costs:mkCosts(2000000,4.0,10),max:10},
+  {id:'transcend', name:'Transcendence',   desc:'Puddle fill penalty halved',      icon:'✨',tier:4,revealAt:2e7,
+    costs:mkCosts(8000000,4.2,10),max:10},
+  {id:'singmind',  name:'Singular Mind',   desc:'Combo mult uncapped',             icon:'🧠',tier:4,revealAt:8e7,
+    costs:mkCosts(4e7,4.5,10),max:10},
+  // Tier 5 — Beyond
+  {id:'genesis',   name:'Genesis Engine',  desc:'Every upgrade ×1.05 stronger',   icon:'🌌',tier:5,revealAt:5e8,
+    costs:mkCosts(2e8,5.0,8),max:8},
+  {id:'godhood',   name:'Godhood',         desc:'Drain reward ×10 per level',      icon:'☀️',tier:5,revealAt:5e9,
+    costs:mkCosts(2e9,5.5,8),max:8},
+  {id:'infinity',  name:'Infinity Loop',   desc:'Auto drops cost nothing·infinite',icon:'♾️',tier:5,revealAt:1e11,
+    costs:mkCosts(5e10,6.0,8),max:8},
+];
+
+// ════════════════════════════════════════════════════════
+// DATA — ACHIEVEMENTS
+// ════════════════════════════════════════════════════════
+const ACHIEVEMENTS = [
+  // ── Driplet milestones ────────────────────────────────────────────────────
+  {id:'drop1',      name:'First Drop',          desc:'Land your first drop on the puddle',     check:s=>s.lifeDrip>=1},
+  {id:'drip1k',     name:'Getting Damp',         desc:'Earn 1,000 total driplets',             check:s=>s.lifeDrip>=1e3},
+  {id:'drip100k',   name:'Flood Warning',        desc:'Earn 100,000 total driplets',           check:s=>s.lifeDrip>=1e5},
+  {id:'drip10m',    name:'Megadrip',             desc:'Earn 10 Million total driplets',        check:s=>s.lifeDrip>=1e7},
+  {id:'drip1b',     name:'Gigadrip',             desc:'Earn 1 Billion total driplets',         check:s=>s.lifeDrip>=1e9},
+  {id:'drip1t',     name:'Teradrip',             desc:'Earn 1 Trillion total driplets',        check:s=>s.lifeDrip>=1e12},
+  {id:'drip1qa',    name:'Quadradrip',           desc:'Earn 1 Quadrillion total driplets',     check:s=>s.lifeDrip>=1e15},
+  {id:'drip1qi',    name:'Quintadrip',           desc:'Earn 1 Quintillion total driplets',     check:s=>s.lifeDrip>=1e18},
+  {id:'drip1sx',    name:'Sextadrip',            desc:'Earn 1 Sextillion total driplets',      check:s=>s.lifeDrip>=1e21},
+  {id:'drip1sp',    name:'Septadrip',            desc:'Earn 1 Septillion total driplets',      check:s=>s.lifeDrip>=1e24},
+  {id:'drip1oc',    name:'Octadrip',             desc:'Earn 1 Octillion total driplets',       check:s=>s.lifeDrip>=1e27},
+  {id:'drip1no',    name:'Nonadrip',             desc:'Earn 1 Nonillion total driplets',       check:s=>s.lifeDrip>=1e30},
+  {id:'drip1dc',    name:'Decadrip',             desc:'Earn 1 Decillion total driplets',       check:s=>s.lifeDrip>=1e33},
+  {id:'drip_god',   name:'The Drip God',         desc:'Earn 1 Vigintillion total driplets',    check:s=>s.lifeDrip>=1e63},
+  {id:'drip_inf',   name:'Beyond Counting',      desc:'Earn 1 Centillion total driplets',      check:s=>s.lifeDrip>=1e303},
+
+  // ── Spending ──────────────────────────────────────────────────────────────
+  {id:'spent100k',  name:'Big Spender',          desc:'Spend 100K driplets total',             check:s=>s.totalSpent>=1e5},
+  {id:'spent10m',   name:'Whale',                desc:'Spend 10M driplets total',              check:s=>s.totalSpent>=1e7},
+  {id:'spent1b',    name:'Cosmic Drip',          desc:'Spend 1B driplets total',               check:s=>s.totalSpent>=1e9},
+  {id:'spent1t',    name:'Economy Wrecker',      desc:'Spend 1T driplets total',               check:s=>s.totalSpent>=1e12},
+  {id:'spent1qa',   name:'Budget? What Budget?', desc:'Spend 1 Quadrillion driplets total',    check:s=>s.totalSpent>=1e15},
+  {id:'spent1qi',   name:'Financial Singularity',desc:'Spend 1 Quintillion driplets total',    check:s=>s.totalSpent>=1e18},
+  {id:'spent1sx',   name:'Post-Economy',         desc:'Spend 1 Sextillion driplets total',     check:s=>s.totalSpent>=1e21},
+  {id:'spent_god',  name:'Money Is Meaningless', desc:'Spend 1 Decillion driplets total',      check:s=>s.totalSpent>=1e33},
+
+  // ── Puddle drains ─────────────────────────────────────────────────────────
+  {id:'drain1',     name:'Drain Day',            desc:'Drain your first puddle',               check:s=>s.puddlesDone>=1},
+  {id:'drain10',    name:'Serial Drainer',       desc:'Drain 10 puddles',                      check:s=>s.puddlesDone>=10},
+  {id:'drain50',    name:'Eternal Loop',         desc:'Drain 50 puddles',                      check:s=>s.puddlesDone>=50},
+  {id:'drain100',   name:'Puddle Master',        desc:'Drain 100 puddles',                     check:s=>s.puddlesDone>=100},
+  {id:'drain500',   name:'The Flood',            desc:'Drain 500 puddles',                     check:s=>s.puddlesDone>=500},
+  {id:'drain1k',    name:'Hydrological Event',   desc:'Drain 1,000 puddles',                   check:s=>s.puddlesDone>=1000},
+  {id:'drain5k',    name:'The Great Deluge',     desc:'Drain 5,000 puddles',                   check:s=>s.puddlesDone>=5000},
+  {id:'drain10k',   name:'Puddle Archaeologist', desc:'Drain 10,000 puddles',                  check:s=>s.puddlesDone>=10000},
+  {id:'drain100k',  name:'The Endless Drain',    desc:'Drain 100,000 puddles',                 check:s=>s.puddlesDone>=100000},
+
+  // ── Puddle levels ─────────────────────────────────────────────────────────
+  {id:'level10',    name:'Getting Serious',      desc:'Reach puddle level 10',                 check:s=>s.puddleLevel>=10},
+  {id:'level100',   name:'Century Puddle',       desc:'Reach puddle level 100',                check:s=>s.puddleLevel>=100},
+  {id:'level1k',    name:'Millennium',           desc:'Reach puddle level 1,000',              check:s=>s.puddleLevel>=1000},
+  {id:'level10k',   name:'Epoch',               desc:'Reach puddle level 10,000',              check:s=>s.puddleLevel>=10000},
+  {id:'level100k',  name:'Deep Time',            desc:'Reach puddle level 100,000',            check:s=>s.puddleLevel>=100000},
+  {id:'level1m',    name:'The Infinite Puddle',  desc:'Reach puddle level 1,000,000',          check:s=>s.puddleLevel>=1000000},
+
+  // ── Combo ─────────────────────────────────────────────────────────────────
+  {id:'combo10',    name:'On Fire',              desc:'Hit a ×10 combo on puddle hits',        check:s=>s.maxCombo>=10},
+  {id:'combo50',    name:'Unstoppable',          desc:'Hit a ×50 combo on puddle hits',        check:s=>s.maxCombo>=50},
+  {id:'combo100',   name:'Combo God',            desc:'Hit a ×100 combo on puddle hits',       check:s=>s.maxCombo>=100},
+  {id:'combo500',   name:'Infinite Streak',      desc:'Hit a ×500 combo on puddle hits',       check:s=>s.maxCombo>=500},
+  {id:'combo1k',    name:'The Drip Machine',     desc:'Hit a ×1,000 combo on puddle hits',     check:s=>s.maxCombo>=1000},
+  {id:'combo5k',    name:'Transcendent Wiggler', desc:'Hit a ×5,000 combo on puddle hits',     check:s=>s.maxCombo>=5000},
+  {id:'combo10k',   name:'Beyond Human',         desc:'Hit a ×10,000 combo on puddle hits',    check:s=>s.maxCombo>=10000},
+
+  // ── Pipes & liquids ───────────────────────────────────────────────────────
+  {id:'pipe2',      name:'Upgrade Day',          desc:'Buy your first pipe upgrade',           check:s=>Object.values(s.hoses).filter(Boolean).length>=2},
+  {id:'pipeall',    name:'Plumber Supreme',      desc:'Unlock all pipes',                      check:s=>HOSES.every(h=>s.hoses[h.id])},
+  {id:'liq2',       name:'Taste Test',           desc:'Try a new liquid',                      check:s=>Object.values(s.liquids).filter(Boolean).length>=2},
+  {id:'liqall',     name:'Alchemist',            desc:'Unlock all liquids',                    check:s=>Object.keys(LIQUIDS).every(k=>s.liquids[k])},
+  {id:'godwater',   name:'Divinity',             desc:'Unlock God Water',                      check:s=>s.liquids.godwater},
+  {id:'abyss_liq',  name:'Into The Void',        desc:'Unlock Abyss liquid',                   check:s=>s.liquids.abyss},
+  {id:'infinidrop', name:'Infinidrop',           desc:'Unlock the Infinidrop liquid',          check:s=>s.liquids.infinidrop},
+  {id:'omega_pipe', name:'The Omega',            desc:'Unlock the Omega Conduit',              check:s=>s.hoses.omega},
+  {id:'godpipe',    name:'God Pipe',             desc:'Unlock the God Pipe',                   check:s=>s.hoses.godpipe},
+
+  // ── Upgrades ──────────────────────────────────────────────────────────────
+  {id:'prestige_max',name:'Prestige Max',        desc:'Max out Prestige Aura',                 check:s=>(s.upgrades.prestige||0)>=10},
+  {id:'godhood_max', name:'Godhood Max',         desc:'Max out Godhood upgrade',               check:s=>(s.upgrades.godhood||0)>=8},
+  {id:'infinity_max',name:'Infinity Loop Max',   desc:'Max out Infinity Loop',                 check:s=>(s.upgrades.infinity||0)>=8},
+  {id:'upg_all',    name:'Completionist',        desc:'Max every single upgrade',              check:s=>UPGRADES.every(u=>(s.upgrades[u.id]||0)>=u.max)},
+
+  // ── Secret / absurd ───────────────────────────────────────────────────────
+  {id:'secret_still',name:'Zen Master',          desc:'Let auto-drip fill a puddle without touching the mouse', check:s=>s._zenPuddle>=1},
+  {id:'secret_speed',name:'Speed Drip',          desc:'Fill a puddle in under 30 seconds',     check:s=>s._fastPuddle>=1},
+  {id:'secret_miss', name:'Butterfingers',       desc:'Miss 1,000 drops (don\'t hit puddle)',  check:s=>s._totalMisses>=1000},
+  {id:'secret_miss10k',name:'Hopeless',          desc:'Miss 10,000 drops total',               check:s=>s._totalMisses>=10000},
+  {id:'drain_nodrop',name:'Patience',            desc:'Drain a puddle using only auto-drip',   check:s=>s._autoPuddle>=1},
+  {id:'combo_miss',  name:'Heartbreaker',        desc:'Break a ×100+ combo with a miss',       check:s=>s._brokeCombo100>=1},
+  {id:'all_achs',    name:'The Completionist',   desc:'Unlock every other achievement',        check:s=>ACHIEVEMENTS.filter(a=>a.id!=='all_achs').every(a=>s.achievements[a.id])},
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const S = {
+  score:0, driplets:0, lifeDrip:0, totalSpent:0,
+  puddleLevel:1, puddlesDone:0, maxCombo:0,
+  combo:0, comboTimer:0,
+  shake:0, autoTimer:0,
+  mouseX:0, mouseHeld:false,
+  hoseBend:0, hoseBendVel:0,
+  hoseBaseX:0, hoseBaseY:-10, hoseLen:170,
+  nozzleX:0, nozzleY:0,
+  drops:[], particles:[], splashes:[],
+  plug:null, dropPressure:0,
+  _shopTimer:0, _saveTimer:0, _milTimer:0,
+  // Secret achievement trackers
+  _totalMisses:0,       // drops that missed the puddle
+  _zenPuddle:0,         // puddles filled without touching mouse
+  _fastPuddle:0,        // puddles filled in <30s
+  _autoPuddle:0,        // puddles drained using only auto-drip
+  _brokeCombo100:0,     // times a ×100+ combo was broken by a miss
+  _puddleStartTime:0,   // timestamp when current puddle fill started
+  _puddleTouchedByMouse:false, // did mouse drip into this puddle?
+  _puddleAutoOnly:true, // was this puddle filled by auto only?
+  puddle:{x:0,y:0,radius:25,maxRadius:200,
+    noise:Array.from({length:24},()=>rnd(-4,4)),
+    noiseT:Array.from({length:24},()=>rnd(-4,4))},
+  currentLiquid:'water', currentHose:'garden',
+  upgrades:{},
+  liquids:{water:true},
+  hoses:{garden:true},
+  achievements:{},
+};
+// zero all upgrade keys
+UPGRADES.forEach(u=>S.upgrades[u.id]=0);
+// zero all liquid/hose keys
+Object.keys(LIQUIDS).forEach(k=>{if(k!=='water')S.liquids[k]=false;});
+HOSES.forEach(h=>{if(h.id!=='garden')S.hoses[h.id]=false;});
+
+// ════════════════════════════════════════════════════════
+// CANVAS
+// ════════════════════════════════════════════════════════
+const canvas=$('c'), ctx=canvas.getContext('2d');
+const PANEL_W=300;
+function resize(){
+  canvas.width=window.innerWidth-PANEL_W;
+  canvas.height=window.innerHeight;
+  S.hoseBaseX=canvas.width/2;
+  S.puddle.x=canvas.width/2;
+  S.puddle.y=canvas.height-60;
+}
+canvas.width=window.innerWidth-PANEL_W;
+canvas.height=window.innerHeight;
+window.addEventListener('resize',resize);
+
+// ════════════════════════════════════════════════════════
+// SAVE / LOAD
+// ════════════════════════════════════════════════════════
+const SAVE_KEY='drip_v3';
+function saveGame(){
+  const d={
+    score:S.score,driplets:S.driplets,lifeDrip:S.lifeDrip,
+    totalSpent:S.totalSpent,puddleLevel:S.puddleLevel,
+    puddlesDone:S.puddlesDone,maxCombo:S.maxCombo,
+    puddleRadius:S.puddle.radius,puddleMaxRadius:S.puddle.maxRadius,
+    currentLiquid:S.currentLiquid,currentHose:S.currentHose,
+    upgrades:S.upgrades,liquids:S.liquids,hoses:S.hoses,
+    achievements:S.achievements,
+  };
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}
+  const ind=$('save-ind');
+  ind.style.color='#00e676';ind.textContent='⬡ saved';
+  setTimeout(()=>{ind.style.color='';ind.textContent='⬡ auto-save';},1500);
+}
+function loadGame(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    S.score=d.score||0;S.driplets=d.driplets||0;
+    S.lifeDrip=d.lifeDrip||0;S.totalSpent=d.totalSpent||0;
+    S.puddleLevel=d.puddleLevel||1;S.puddlesDone=d.puddlesDone||0;
+    S.maxCombo=d.maxCombo||0;
+    S.puddle.radius=d.puddleRadius||25;
+    S.puddle.maxRadius=d.puddleMaxRadius||200;
+    S.currentLiquid=d.currentLiquid||'water';
+    S.currentHose=d.currentHose||'garden';
+    if(d.upgrades)Object.assign(S.upgrades,d.upgrades);
+    if(d.liquids)Object.assign(S.liquids,d.liquids);
+    if(d.hoses)Object.assign(S.hoses,d.hoses);
+    if(d.achievements)Object.assign(S.achievements,d.achievements);
+  }catch(e){console.warn('Load failed',e);}
+}
+
+// ════════════════════════════════════════════════════════
+// GAME HELPERS
+// ════════════════════════════════════════════════════════
+function liq(){return LIQUIDS[S.currentLiquid]||LIQUIDS.water;}
+function hose(){return HOSES.find(h=>h.id===S.currentHose)||HOSES[0];}
+function upg(id){return S.upgrades[id]||0;}
+
+function genesisBonus(){return Math.pow(1.05,upg('genesis'));}
+function flowInterval(){
+  const base=1600,red=upg('flow')*105,pres=upg('pressure')*.05,tw=upg('timewarp')*.15;
+  return Math.max(60,(base-red)/(hose().flow*(1+pres+tw)));
+}
+function dropRadius(){
+  // Hard cap so drops don't dominate screen — max 22px visual radius
+  const raw=(4+upg('size')*1.2)*liq().sz*Math.sqrt(hose().dmult)*(1+upg('gravity')*.10)*genesisBonus();
+  return clamp(raw,3,22);
+}
+function dropValue(){
+  const h=hose(),l=liq();
+  const vm=1+upg('value')*.38,szm=1+upg('size')*.12,spm=1+upg('splash')*.10;
+  const hm=1+(h.dmult-1)*.45,pm=Math.pow(1.12,upg('prestige'));
+  const gm=genesisBonus();
+  return vm*szm*spm*hm*pm*gm*l.mult;
+}
+function wiggle(){return 1+upg('wiggle')*.45;}
+function autoInterval(){
+  if(!upg('auto'))return Infinity;
+  const tw=1+upg('timewarp')*.22;
+  return Math.max(60,5500/(upg('auto')*tw));
+}
+function comboWindow(){return 50+upg('combo')*28;}
+function comboMult(){
+  if(S.combo<2)return 1;
+  const cap=upg('singmind')>0?99999:5;
+  return 1+Math.min(S.combo*.055,cap)*(1+upg('combo')*.08);
+}
+function drainBonus(){
+  return (1+upg('drain')*.32)*Math.pow(10,upg('godhood')*.6)*genesisBonus();
+}
+function magnetForce(){return(upg('puddle')*.05+upg('conductor')*.08)*genesisBonus();}
+function fillAmt(r,spread){
+  const tc=1+upg('transcend')*.14;
+  const pen=Math.pow(1.28,S.puddleLevel-1)/tc;
+  return(r*r*.0032*spread)/pen;
+}
+function multiChance(){return Math.min(upg('multidrip')*.07,.85);}
+function visible(revealAt){return(S.totalSpent||0)>=revealAt;}
+
+// ════════════════════════════════════════════════════════
+// PARTICLES & FLOATERS
+// ════════════════════════════════════════════════════════
+function splash(x,y,liq,n){
+  for(let i=0;i<n;i++){
+    const a=rnd(0,Math.PI*2),spd=rnd(1.5,5);
+    S.particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd-rnd(2,4),
+      r:rnd(1.5,3.5),life:1,decay:rnd(.03,.06),col:liq.color});
+  }
+  S.splashes.push({x,y,r:4,maxR:35,life:1,col:liq.color});
+}
+function floatTxt(x,y,txt,col){
+  const el=document.createElement('div');
+  el.className='floater';
+  el.style.cssText=`left:${x}px;top:${y}px;color:${col};`;
+  el.textContent=txt;
+  $('floaters').appendChild(el);
+  setTimeout(()=>el.remove(),1050);
+}
+
+// ════════════════════════════════════════════════════════
+// DROP PHYSICS
+// ════════════════════════════════════════════════════════
+function spawnDrop(fromAuto=false){
+  const l=liq(),w=wiggle();
+  const vx=S.hoseBendVel*.35+rnd(-1.5,1.5)*l.spread*w;
+  const vy=Math.max(.4,rnd(.8,2.2)-upg('gravity')*.07);
+  const r=dropRadius();
+  S.drops.push({x:S.nozzleX,y:S.nozzleY,vx,vy,r,liqId:S.currentLiquid,trail:[],bounces:0,fromAuto});
+  if(Math.random()<multiChance()){
+    S.drops.push({x:S.nozzleX+rnd(-10,10),y:S.nozzleY,
+      vx:vx+rnd(-2,2),vy,r:r*.75,liqId:S.currentLiquid,trail:[],bounces:0,fromAuto});
+  }
+  if(!fromAuto)S._puddleTouchedByMouse=true;
+}
+
+function dropLanded(d){
+  const l=LIQUIDS[d.liqId]||LIQUIDS.water;
+  const val=dropValue();
+  const cm=comboMult();
+  // No arbitrary cap — number formatting handles big numbers
+  const earned=Math.max(1,Math.round(val*cm));
+
+  S.score+=earned*10;
+  S.driplets+=earned;
+  S.lifeDrip+=earned;
+  S.shake=Math.min(S.shake+1.2,5);
+
+  const onPuddle=dst(d.x,d.y,S.puddle.x,S.puddle.y)<S.puddle.radius*1.5;
+  const grow=fillAmt(d.r,l.spread)*(onPuddle?1.3:.42);
+  S.puddle.radius=Math.min(S.puddle.maxRadius,S.puddle.radius+grow);
+
+  // Combo only builds on puddle hits — misses reset it
+  if(onPuddle){
+    S.combo++;
+    S.comboTimer=comboWindow();
+    if(S.combo>S.maxCombo)S.maxCombo=S.combo;
+  } else {
+    if(S.combo>=100)S._brokeCombo100++;
+    S.combo=0;
+    S.comboTimer=0;
+    $('combo-wrap').style.opacity='0';
+    S._totalMisses++;
+  }
+
+  // Track whether mouse was involved in this puddle
+  if(!fromAuto)S._puddleTouchedByMouse=true;
+
+  // Overflow bonus
+  if(S.puddle.radius>=S.puddle.maxRadius&&upg('overflow')>0){
+    const bonus=Math.round(earned*upg('overflow')*.4);
+    S.driplets+=bonus;S.lifeDrip+=bonus;
+    if(bonus>0)floatTxt(d.x,d.y-30,`overflow +${fmt(bonus)}`,'#ff6600');
+  }
+
+  if(S.puddle.radius>=S.puddle.maxRadius&&!S.plug){
+    S.plug={x:S.puddle.x,y:S.puddle.y-32,bob:0,draining:false,prog:0};
+  }
+
+  for(let i=0;i<S.puddle.noise.length;i++){
+    S.puddle.noiseT[i]+=rnd(-5,5);
+    S.puddle.noiseT[i]=clamp(S.puddle.noiseT[i],-18,18);
+  }
+  splash(d.x,d.y,l,onPuddle?10:5);
+  floatTxt(d.x,d.y-18,`+${fmt(earned)}`,l.color);
+  updateHUD();
+}
+
+// ════════════════════════════════════════════════════════
+// UPDATE
+// ════════════════════════════════════════════════════════
+let lastTs=0;
+function update(ts){
+  const dt=Math.min(ts-lastTs,50);lastTs=ts;
+
+  // Hose spring
+  const maxB=canvas.width*.36*wiggle();
+  const target=S.mouseHeld?((S.mouseX/canvas.width)-.5)*2*maxB:0;
+  const k=S.mouseHeld?.22:.04,damp=.74;
+  const prevBend=S.hoseBend;
+  S.hoseBendVel=(S.hoseBendVel+(target-S.hoseBend)*k)*damp;
+  S.hoseBend+=S.hoseBendVel;
+  S.nozzleX=S.hoseBaseX+S.hoseBend;
+  S.nozzleY=S.hoseBaseY+S.hoseLen;
+  S.shake*=.88;
+
+  // ── Drop spawning: wiggle = more drops ──────────────────
+  // How fast the nozzle tip is moving this frame
+  const nozzleSpeed=Math.abs(S.hoseBendVel);
+
+  if(S.mouseHeld){
+    // Wiggle pressure: fast movement fills the bucket quickly.
+    // Wiggle Amp upgrade multiplies the contribution.
+    // Base trickle even when still so holding always does something.
+    const wiggleContrib = nozzleSpeed * (0.08 + upg('wiggle') * 0.04);
+    const baseTrickle   = 0.002;
+    S.dropPressure = (S.dropPressure||0) + (baseTrickle + wiggleContrib) * dt;
+
+    const dropCost = Math.max(40, 800 - upg('flow') * 50);
+
+    while(S.dropPressure >= dropCost){
+      S.dropPressure -= dropCost;
+      spawnDrop();
+    }
+  } else {
+    // Bleed pressure when not held so it doesn't instantly burst on re-click
+    S.dropPressure = Math.max(0, (S.dropPressure||0) - dt * 0.05);
+  }
+
+  // Auto-drip
+  if(upg('auto')>0){
+    S.autoTimer+=dt;
+    if(S.autoTimer>=autoInterval()){S.autoTimer=0;spawnDrop();}
+  }
+
+  // Combo decay
+  if(S.comboTimer>0){
+    S.comboTimer-=dt;
+    if(S.comboTimer<=0){S.combo=0;$('combo-wrap').style.opacity='0';}
+  }
+
+  // Puddle noise
+  for(let i=0;i<S.puddle.noise.length;i++){
+    S.puddle.noise[i]=lerp(S.puddle.noise[i],S.puddle.noiseT[i],.04);
+    S.puddle.noiseT[i]+=rnd(-.4,.4);
+    S.puddle.noiseT[i]*=.97;
+  }
+
+  // Plug drain
+  if(S.plug){
+    S.plug.bob=Math.sin(Date.now()*.003)*5;
+    if(S.plug.draining){
+      S.plug.prog+=dt*.0009;
+      S.puddle.radius=S.puddle.maxRadius*(1-S.plug.prog);
+      if(S.plug.prog>=1){
+        S.puddlesDone++;
+        const base=Math.round(250*Math.pow(1.55,S.puddleLevel-1));
+        const reward=Math.round(base*drainBonus());
+        S.driplets+=reward;S.lifeDrip+=reward;S.totalSpent; // track
+        floatTxt(S.puddle.x,S.puddle.y-70,`+${fmt(reward)} 💧 DRAINED!`,'#ffc800');
+        S.puddleLevel++;
+        S.puddle.maxRadius=clamp(200+S.puddleLevel*6,200,350);
+        S.puddle.radius=25;S.plug=null;
+        updateHUD();buildShop();checkMilestones();
+      }
+    }
+  }
+
+  // Drop physics
+  const gnd=canvas.height-60;
+  const mag=magnetForce();
+  for(let i=S.drops.length-1;i>=0;i--){
+    const d=S.drops[i];
+    d.trail.push({x:d.x,y:d.y});
+    if(d.trail.length>8)d.trail.shift();
+    const dl=LIQUIDS[d.liqId]||LIQUIDS.water;
+    d.vy+=dl.gravity*(1+upg('pressure')*.07);
+    d.vx*=.995;
+    if(mag>0){
+      const dx2=S.puddle.x-d.x,dy2=S.puddle.y-d.y,dd=Math.sqrt(dx2*dx2+dy2*dy2);
+      if(dd>1){d.vx+=(dx2/dd)*mag;d.vy+=(dy2/dd)*mag*.25;}
+    }
+    d.x+=d.vx;d.y+=d.vy;
+    if(d.x<d.r){d.x=d.r;d.vx=Math.abs(d.vx)*.4;}
+    if(d.x>canvas.width-d.r){d.x=canvas.width-d.r;d.vx=-Math.abs(d.vx)*.4;}
+    if(d.y>=gnd-d.r){
+      if(dl.bounce>0&&d.bounces<3&&Math.abs(d.vy)>2.5){
+        d.y=gnd-d.r;d.vy=-d.vy*dl.bounce;d.vx+=rnd(-1,1);d.bounces++;
+        splash(d.x,d.y,dl,3);
+      }else{dropLanded(d);S.drops.splice(i,1);}
+    }
+  }
+
+  // Particles
+  for(let i=S.particles.length-1;i>=0;i--){
+    const p=S.particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.2;p.life-=p.decay;
+    if(p.life<=0)S.particles.splice(i,1);
+  }
+  for(let i=S.splashes.length-1;i>=0;i--){
+    const sp=S.splashes[i];
+    sp.r+=(sp.maxR-sp.r)*.12;sp.life-=.055;
+    if(sp.life<=0)S.splashes.splice(i,1);
+  }
+
+  // Periodic tasks
+  S._shopTimer+=dt;if(S._shopTimer>4000){S._shopTimer=0;buildShop();}
+  S._saveTimer+=dt;if(S._saveTimer>30000){S._saveTimer=0;saveGame();}
+  S._milTimer+=dt;if(S._milTimer>2000){S._milTimer=0;checkMilestones();}
+
+  // Combo display
+  if(S.combo>=3){
+    $('combo-wrap').style.opacity='1';
+    $('combo-txt').textContent=`DRIP ×${S.combo}`;
+    $('combo-txt').style.fontSize=Math.min(30+S.combo*.8,72)+'px';
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// DRAW
+// ════════════════════════════════════════════════════════
+function draw(){
+  ctx.save();
+  if(S.shake>.3){ctx.translate(rnd(-S.shake,S.shake),rnd(-S.shake*.4,S.shake*.4));}
+
+  // Background
+  ctx.fillStyle='#070710';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Subtle hex grid
+  drawGrid();
+
+  drawGround();
+  drawPuddle();
+  drawSplashes();
+  drawParticles();
+  drawDrops();
+  drawHose();
+  drawPlug();
+
+  ctx.restore();
+}
+
+function drawGrid(){
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.018)';
+  ctx.lineWidth=.5;
+  const s=56;
+  for(let x=0;x<canvas.width;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(let y=0;y<canvas.height;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  ctx.restore();
+}
+
+function drawGround(){
+  const gy=canvas.height-60;
+  ctx.fillStyle='#0b0b1a';
+  ctx.fillRect(0,gy,canvas.width,canvas.height-gy);
+  ctx.strokeStyle='#252545';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(canvas.width,gy);ctx.stroke();
+  // Glow under puddle
+  const l=liq();
+  const g=ctx.createRadialGradient(S.puddle.x,gy,0,S.puddle.x,gy,S.puddle.radius*1.4);
+  g.addColorStop(0,l.pLight);g.addColorStop(1,'transparent');
+  ctx.fillStyle=g;ctx.fillRect(0,gy-5,canvas.width,10);
+}
+
+function drawPuddle(){
+  const p=S.puddle,segs=p.noise.length,l=liq();
+  ctx.save();ctx.translate(p.x,p.y);
+
+  // Outer glow
+  const gg=ctx.createRadialGradient(0,0,0,0,0,p.radius*1.5);
+  gg.addColorStop(0,l.pLight);gg.addColorStop(1,'transparent');
+  ctx.fillStyle=gg;
+  ctx.beginPath();ctx.ellipse(0,0,p.radius*1.6,p.radius*.5,0,0,Math.PI*2);ctx.fill();
+
+  // Body
+  ctx.beginPath();
+  for(let i=0;i<=segs;i++){
+    const a=(i/segs)*Math.PI*2-Math.PI/2;
+    const r=p.radius+p.noise[i%segs];
+    const px=Math.cos(a)*r,py=Math.sin(a)*r*.3;
+    i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  const fg=ctx.createRadialGradient(0,-p.radius*.05,0,0,0,p.radius);
+  fg.addColorStop(0,l.puddle+'ee');fg.addColorStop(.7,l.puddle+'99');fg.addColorStop(1,l.puddle+'33');
+  ctx.fillStyle=fg;ctx.fill();
+  // Highlight
+  ctx.beginPath();ctx.ellipse(-p.radius*.12,-p.radius*.04,p.radius*.28,p.radius*.07,-.15,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.09)';ctx.fill();
+  ctx.strokeStyle=l.color+'55';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.restore();
+}
+
+function drawSplashes(){
+  for(const s of S.splashes){
+    ctx.beginPath();ctx.ellipse(s.x,s.y,s.r,s.r*.28,0,0,Math.PI*2);
+    ctx.strokeStyle=s.col+Math.round(s.life*0x77).toString(16).padStart(2,'0');
+    ctx.lineWidth=1;ctx.stroke();
+  }
+}
+function drawParticles(){
+  for(const p of S.particles){
+    ctx.globalAlpha=p.life;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
+    ctx.fillStyle=p.col;ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+function drawDrops(){
+  for(const d of S.drops){
+    const l=LIQUIDS[d.liqId]||LIQUIDS.water;
+    // Trail
+    for(let t=0;t<d.trail.length;t++){
+      const tr=d.trail[t],a=t/d.trail.length;
+      ctx.globalAlpha=a*.25;
+      ctx.beginPath();ctx.arc(tr.x,tr.y,d.r*a*.6,0,Math.PI*2);
+      ctx.fillStyle=l.color;ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    // Drop — teardrop
+    ctx.save();ctx.translate(d.x,d.y);
+    const spd=Math.sqrt(d.vx**2+d.vy**2);
+    ctx.rotate(Math.atan2(d.vy,d.vx)-Math.PI/2);
+    const str=clamp(1+spd*.04,.8,1.6);
+    ctx.scale(1/str,str);
+    ctx.beginPath();ctx.arc(0,0,d.r,0,Math.PI*2);
+    ctx.fillStyle=l.color;ctx.fill();
+    ctx.beginPath();ctx.arc(-d.r*.22,-d.r*.22,d.r*.28,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.28)';ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawHose(){
+  const bx=S.hoseBaseX,by=S.hoseBaseY,nx=S.nozzleX,ny=S.nozzleY;
+  const h=hose(),l=liq();
+  const cx=bx+(nx-bx)*.45,cy=by+(ny-by)*.55;
+  ctx.save();ctx.lineCap='round';
+
+  // Tube layers
+  [[22,'#0d0d1e'],[15,h.col],[8,h.hi]].forEach(([lw,col])=>{
+    ctx.lineWidth=lw;ctx.strokeStyle=col;
+    ctx.beginPath();ctx.moveTo(bx,by);ctx.quadraticCurveTo(cx,cy,nx,ny);ctx.stroke();
+  });
+  // Stripe
+  ctx.lineWidth=2;ctx.strokeStyle=h.hi+'55';ctx.setLineDash([8,14]);
+  ctx.beginPath();ctx.moveTo(bx,by);ctx.quadraticCurveTo(cx,cy,nx,ny);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Wall bracket
+  ctx.fillStyle='#2a2a5a';ctx.beginPath();ctx.rect(bx-18,by-12,36,12);ctx.fill();
+  ctx.fillStyle='#3a3a7a';ctx.beginPath();ctx.rect(bx-10,by-20,20,10);ctx.fill();
+
+  // Nozzle
+  const ang=Math.atan2(ny-cy,nx-cx);
+  ctx.save();ctx.translate(nx,ny);ctx.rotate(ang-Math.PI/2);
+  ctx.fillStyle=h.col;ctx.beginPath();ctx.rect(-9,-4,18,20);ctx.fill();
+  ctx.fillStyle=h.hi;ctx.beginPath();ctx.rect(-6,12,12,8);ctx.fill();
+  ctx.restore();
+
+  // Drip at tip
+  const tipX=nx+Math.cos(ang)*20,tipY=ny+Math.sin(ang)*20;
+  const ds=2.5+Math.sin(Date.now()*.003)*2;
+  ctx.beginPath();ctx.arc(tipX,tipY,ds,0,Math.PI*2);
+  ctx.fillStyle=l.color+'cc';ctx.fill();
+  ctx.restore();
+}
+
+function drawPlug(){
+  if(!S.plug)return;
+  const p=S.plug,l=liq();
+  const x=p.x,y=p.y+p.bob;
+  ctx.save();
+  if(p.draining){
+    ctx.translate(x,y+p.prog*50);
+    ctx.rotate(p.prog*Math.PI*8);
+    ctx.globalAlpha=1-p.prog*.9;
+  }else{
+    ctx.translate(x,y);
+    const pulse=(Math.sin(Date.now()*.005)+1)*.5;
+    ctx.beginPath();ctx.arc(0,0,30+pulse*9,0,Math.PI*2);
+    ctx.strokeStyle=l.color+Math.round(pulse*0x99).toString(16).padStart(2,'0');
+    ctx.lineWidth=2;ctx.stroke();
+  }
+  // Chain
+  ctx.strokeStyle='#aaa';ctx.lineWidth=1.8;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(0,-22);ctx.lineTo(0,-40);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(0,-42,5,0,Math.PI*2);ctx.lineWidth=2;ctx.stroke();
+  // Disc
+  ctx.beginPath();ctx.ellipse(0,0,22,8,0,0,Math.PI*2);
+  ctx.fillStyle='#c8a96e';ctx.fill();ctx.strokeStyle='#a07840';ctx.lineWidth=1.5;ctx.stroke();
+  // Dome
+  ctx.beginPath();ctx.ellipse(0,-5,14,14,0,0,Math.PI*2);
+  ctx.fillStyle='#d4b47a';ctx.fill();ctx.strokeStyle='#a07840';ctx.lineWidth=1.5;ctx.stroke();
+  // Ridges
+  for(let i=-1;i<=1;i++){
+    ctx.beginPath();ctx.moveTo(i*5-1,-12);ctx.lineTo(i*5-1,0);
+    ctx.strokeStyle='#a0784088';ctx.lineWidth=1;ctx.stroke();
+  }
+  if(!p.draining){
+    ctx.font='bold 10px "Space Mono",monospace';ctx.fillStyle='#fff';
+    ctx.textAlign='center';ctx.fillText('PULL',0,30);
+  }
+  ctx.globalAlpha=1;ctx.restore();
+}
+
+// ════════════════════════════════════════════════════════
+// HUD
+// ════════════════════════════════════════════════════════
+function updateHUD(){
+  $('h-score').textContent=fmt(S.score);
+  $('h-drip').textContent=fmt(S.driplets);
+  $('h-puddle').textContent=Math.round((S.puddle.radius/S.puddle.maxRadius)*100)+'%';
+  $('h-level').textContent=S.puddleLevel;
+}
+
+// ════════════════════════════════════════════════════════
+// SHOP
+// ════════════════════════════════════════════════════════
+let currentTab='upgrades';
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[id^="tab-"]').forEach(d=>d.style.display='none');
+  event.target.classList.add('active');
+  $('tab-'+t).style.display='block';
+  if(t==='ach')buildAchTab();
+}
+
+function buildShop(){
+  buildUpgradesTab();
+  buildPipesTab();
+  buildLiquidsTab();
+}
+
+function buildUpgradesTab(){
+  const el=$('tab-upgrades');el.innerHTML='';
+  const tiers={1:'Tier 1 — Core',2:'Tier 2 — Mid Game',3:'Tier 3 — Late Game',4:'Tier 4 — End Game',5:'Tier 5 — Beyond'};
+  let lastTier=0;
+  for(const def of UPGRADES){
+    if(!visible(def.revealAt))continue;
+    if(def.tier!==lastTier){
+      const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent=tiers[def.tier];el.appendChild(lbl);
+      lastTier=def.tier;
+    }
+    const lvl=upg(def.id),maxed=lvl>=def.max,cost=maxed?null:def.costs[lvl];
+    const can=!maxed&&S.driplets>=cost;
+    const btn=document.createElement('button');
+    btn.className='upg'+(maxed?' maxed':can?' can':'');
+    btn.disabled=maxed;
+    btn.innerHTML=`<div class="upg-top"><span class="upg-name">${def.icon} ${def.name}</span><span class="upg-lvl">${lvl}/${def.max}</span></div>
+      <div class="upg-desc">${def.desc}</div>
+      <div class="upg-bar"><div class="upg-bar-fill" style="width:${(lvl/def.max)*100}%"></div></div>
+      <div class="upg-cost">${maxed?'✓ MAXED':'💧 '+fmt(cost)}</div>`;
+    if(!maxed)btn.addEventListener('click',()=>{
+      const c=def.costs[upg(def.id)];
+      if(S.driplets>=c){S.driplets-=c;S.totalSpent+=c;S.upgrades[def.id]++;updateHUD();buildShop();checkMilestones();}
+    });
+    el.appendChild(btn);
+  }
+}
+
+function buildPipesTab(){
+  const el=$('tab-pipes');el.innerHTML='';
+  const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Pipes & Hoses';el.appendChild(lbl);
+  for(const h of HOSES){
+    if(!visible(h.revealAt))continue;
+    const unl=S.hoses[h.id],active=S.currentHose===h.id;
+    const btn=document.createElement('button');
+    btn.className='tile'+(active?' active':'')+(!unl?' locked':'');
+    btn.style.borderColor=active?h.hi+'99':'';
+    btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${h.col}"></div>
+      <div><div class="tile-name">${h.icon} ${h.name}</div><div style="font-size:10px;color:#7070a0;margin-top:2px">${h.desc}</div></div></div>
+      <div class="tile-right">${unl?`×${h.flow} flow`:'💧 '+fmt(h.cost)}<br><span class="sub">${unl?'✓ owned':S.driplets>=h.cost?'tap to buy':'locked'}</span></div>`;
+    btn.addEventListener('click',()=>{
+      if(!unl){if(S.driplets>=h.cost){S.driplets-=h.cost;S.totalSpent+=h.cost;S.hoses[h.id]=true;S.currentHose=h.id;updateHUD();buildShop();checkMilestones();}}
+      else{S.currentHose=h.id;buildShop();}
+    });
+    el.appendChild(btn);
+  }
+}
+
+function buildLiquidsTab(){
+  const el=$('tab-liquids');el.innerHTML='';
+  const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Liquids';el.appendChild(lbl);
+  for(const [id,l] of Object.entries(LIQUIDS)){
+    if(!visible(l.revealAt))continue;
+    const unl=S.liquids[id],active=S.currentLiquid===id;
+    const btn=document.createElement('button');
+    btn.className='tile'+(active?' active':'')+(!unl?' locked':'');
+    btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${l.color}"></div>
+      <div><div class="tile-name">${l.emoji} ${l.name}</div><div style="font-size:10px;color:#7070a0;margin-top:2px">${l.desc}</div></div></div>
+      <div class="tile-right">${unl?'active':'💧 '+fmt(l.cost)}<br><span class="sub">${unl?'✓ owned':S.driplets>=l.cost?'tap to buy':'locked'}</span></div>`;
+    btn.addEventListener('click',()=>{
+      if(!unl){if(S.driplets>=l.cost){S.driplets-=l.cost;S.totalSpent+=l.cost;S.liquids[id]=true;S.currentLiquid=id;updateHUD();buildShop();checkMilestones();}}
+      else{S.currentLiquid=id;buildShop();}
+    });
+    el.appendChild(btn);
+  }
+}
+
+function buildAchTab(){
+  const el=$('tab-ach');el.innerHTML='';
+  const got=ACHIEVEMENTS.filter(a=>S.achievements[a.id]);
+  const lbl=document.createElement('div');lbl.className='ach-count';
+  lbl.textContent=`${got.length} / ${ACHIEVEMENTS.length} unlocked`;el.appendChild(lbl);
+  for(const a of ACHIEVEMENTS){
+    const has=!!S.achievements[a.id];
+    const div=document.createElement('div');
+    div.className='ach'+(has?' got':'');
+    div.innerHTML=`<div class="ach-name">${has?'🏆':''} ${a.name}</div><div class="ach-desc">${a.desc}</div>`;
+    el.appendChild(div);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// ACHIEVEMENTS
+// ════════════════════════════════════════════════════════
+function checkMilestones(){
+  for(const a of ACHIEVEMENTS){
+    if(!S.achievements[a.id]&&a.check(S)){
+      S.achievements[a.id]=true;
+      showToast(a);
+      if(currentTab==='ach')buildAchTab();
+      saveGame();
+    }
+  }
+}
+
+function showToast(a){
+  const wrap=$('toast-area');
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="toast-tag">Achievement Unlocked</div>
+    <div class="toast-name">🏆 ${a.name}</div>
+    <div class="toast-desc">${a.desc}</div>`;
+  wrap.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .6s';},3000);
+  setTimeout(()=>t.remove(),3700);
+}
+
+// ════════════════════════════════════════════════════════
+// INPUT
+// ════════════════════════════════════════════════════════
+const cur=$('cur');
+function handleMove(cx,cy){
+  S.mouseX=Math.min(cx,canvas.width);
+  if(cy!==undefined)cur.style.top=cy+'px';
+  if(cx<canvas.width){cur.style.left=cx+'px';cur.style.display='block';}
+  else cur.style.display='none';
+}
+function handleClick(cx,cy){
+  if(!S.plug||S.plug.draining)return;
+  const px=S.plug.x,py=S.plug.y+S.plug.bob;
+  if(Math.sqrt((cx-px)**2+(cy-py)**2)<36){S.plug.draining=true;S.mouseHeld=false;}
+}
+window.addEventListener('mousemove',e=>handleMove(e.clientX,e.clientY));
+window.addEventListener('mousedown',e=>{
+  handleClick(e.clientX,e.clientY);
+  if(e.clientX<canvas.width){S.mouseHeld=true;handleMove(e.clientX,e.clientY);}
+});
+window.addEventListener('mouseup',()=>{S.mouseHeld=false;});
+window.addEventListener('mouseleave',()=>{S.mouseHeld=false;});
+window.addEventListener('touchstart',e=>{
+  handleClick(e.touches[0].clientX,e.touches[0].clientY);
+  S.mouseHeld=true;handleMove(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:true});
+window.addEventListener('touchmove',e=>{
+  e.preventDefault();handleMove(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:false});
+window.addEventListener('touchend',()=>{S.mouseHeld=false;});
+
+// ════════════════════════════════════════════════════════
+// INIT & LOOP
+// ════════════════════════════════════════════════════════
+loadGame();
+S.hoseBaseX=canvas.width/2;
+S.hoseBaseY=-10;
+S.nozzleX=canvas.width/2;
+S.nozzleY=S.hoseBaseY+S.hoseLen;
+S.mouseX=canvas.width/2;
+S.puddle.x=canvas.width/2;
+S.puddle.y=canvas.height-60;
+
+buildShop();updateHUD();checkMilestones();
+
+function loop(ts){update(ts);draw();requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
