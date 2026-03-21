@@ -1578,6 +1578,53 @@ canvas.addEventListener('touchmove',e=>{
 canvas.addEventListener('touchend',()=>{S.mouseHeld=false;});
 window.addEventListener('touchend',()=>{S.mouseHeld=false;});
 
+// ── Phone shake → fling the hose ─────────────────────────────
+(()=>{
+  let lastAx=0, lastAy=0, lastAz=0;
+  let permissionAsked=false;
+
+  function handleMotion(e){
+    const a=e.accelerationIncludingGravity||e.acceleration;
+    if(!a)return;
+    const ax=a.x||0, ay=a.y||0, az=a.z||0;
+    const dx=ax-lastAx, dy=ay-lastAy, dz=az-lastAz;
+    lastAx=ax; lastAy=ay; lastAz=az;
+
+    // Total jolt magnitude
+    const jolt=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    if(jolt<4)return; // ignore tiny bumps
+
+    // Map lateral acceleration (x-axis on phone) to hose bend velocity
+    const force = clamp(dx * 1.8, -40, 40) * (1 + upg('wiggle')*.3);
+    S.hoseBendVel += force;
+    S.mouseHeld = true; // open the tap while shaking
+
+    // Screen shake proportional to jolt
+    S.shake = Math.min(S.shake + jolt * .4, 10);
+
+    // Auto-stop tap after 300ms of no motion
+    clearTimeout(S._shakeTimeout);
+    S._shakeTimeout = setTimeout(()=>{ S.mouseHeld = false; }, 300);
+  }
+
+  // iOS 13+ requires explicit permission
+  function requestMotion(){
+    if(permissionAsked)return;
+    permissionAsked=true;
+    if(typeof DeviceMotionEvent!=='undefined' &&
+       typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission()
+        .then(r=>{ if(r==='granted') window.addEventListener('devicemotion',handleMotion); })
+        .catch(()=>{});
+    } else {
+      window.addEventListener('devicemotion',handleMotion);
+    }
+  }
+
+  // Request on first touch (needs user gesture on iOS)
+  document.addEventListener('touchstart', requestMotion, {once:true, passive:true});
+})();
+
 // ════════════════════════════════════════════════════════
 // INIT & LOOP
 // ════════════════════════════════════════════════════════
