@@ -240,9 +240,6 @@ canvas{position:absolute;top:0;left:0;display:block;}
   <div class="stat"><div class="stat-lbl">Driplets 💧</div><div class="stat-val gold" id="h-drip">0</div></div>
   <div class="stat"><div class="stat-lbl">Puddle</div><div class="stat-val green" id="h-puddle">0%</div></div>
   <div class="stat"><div class="stat-lbl">Level</div><div class="stat-val" id="h-level">1</div></div>
-  <div style="margin-left:auto;pointer-events:none;">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:5px;color:var(--accent);opacity:.35;line-height:1;">VISCOSITY</div>
-  </div>
 </div>
 <div id="combo-wrap"><div id="combo-txt">FLOW ×0</div><div id="combo-sub">combo</div></div>
 <div id="floaters"></div>
@@ -566,6 +563,9 @@ HOSES.forEach(h=>{if(h.id!=='garden')S.hoses[h.id]=false;});
 // CANVAS
 // ════════════════════════════════════════════════════════
 const canvas=$('c'), ctx=canvas.getContext('2d');
+// Safe visible height — uses visualViewport on mobile to avoid browser chrome overlap
+function visH(){ return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
+function groundY(){ return visH() - 80; }
 const PANEL_W=()=>window.innerWidth<=600?0:window.innerWidth<=900&&window.innerHeight<=500?220:300;
 
 function toggleShop(){
@@ -587,13 +587,14 @@ function toggleShop(){
 })();
 function resize(){
   const pw=PANEL_W();
+  const vh=visH();
   canvas.width=window.innerWidth-pw;
-  canvas.height=window.innerHeight;
+  canvas.height=vh;
   canvas.style.width=(window.innerWidth-pw)+'px';
-  canvas.style.height=window.innerHeight+'px';
+  canvas.style.height=vh+'px';
   S.hoseBaseX=canvas.width/2;
   S.puddle.x=canvas.width/2;
-  S.puddle.y=canvas.height-60;
+  S.puddle.y=groundY();
   if(typeof FX!=='undefined'){
     for(const p of FX.bgParticles){
       p.x=rnd(0,canvas.width);p.y=rnd(0,canvas.height);
@@ -601,10 +602,11 @@ function resize(){
   }
 }
 canvas.width=window.innerWidth-PANEL_W();
-canvas.height=window.innerHeight;
+canvas.height=visH();
 canvas.style.width=(window.innerWidth-PANEL_W())+'px';
-canvas.style.height=window.innerHeight+'px';
+canvas.style.height=visH()+'px';
 window.addEventListener('resize',resize);
+if(window.visualViewport) window.visualViewport.addEventListener('resize',resize);
 
 // ════════════════════════════════════════════════════════
 // SAVE / LOAD
@@ -864,7 +866,7 @@ function update(ts){
   }
 
   // Drop physics
-  const gnd=canvas.height-60;
+  const gnd=groundY();
   const mag=magnetForce();
   for(let i=S.drops.length-1;i>=0;i--){
     const d=S.drops[i];
@@ -1096,7 +1098,7 @@ function drawGrid(){
 }
 
 function drawGround(){
-  const gy=canvas.height-60;
+  const gy=groundY();
   ctx.fillStyle='#0b0b1a';
   ctx.fillRect(0,gy,canvas.width,canvas.height-gy);
   ctx.strokeStyle='#252545';ctx.lineWidth=1;
@@ -1448,7 +1450,7 @@ S.nozzleX=canvas.width/2;
 S.nozzleY=S.hoseBaseY+S.hoseLen;
 S.mouseX=canvas.width/2;
 S.puddle.x=canvas.width/2;
-S.puddle.y=canvas.height-60;
+S.puddle.y=groundY();
 
 buildShop();updateHUD();checkMilestones();
 
