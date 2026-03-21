@@ -16,7 +16,7 @@
 }
 body{background:var(--bg);font-family:'Space Mono',monospace;color:var(--text);overflow:hidden;height:100vh;width:100vw;cursor:none;}
 canvas{position:absolute;top:0;left:0;display:block;}
- 
+
 /* ── HUD ───────────────────────────────────────────────────── */
 #hud{
   position:absolute;top:0;left:0;right:var(--panel-w);
@@ -29,7 +29,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;color:var(--accent);}
 .stat-val.gold{color:var(--gold);}
 .stat-val.green{color:var(--green);}
- 
+
 /* ── COMBO ─────────────────────────────────────────────────── */
 #combo-wrap{
   position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
@@ -41,7 +41,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
   text-shadow:0 2px 20px #ffc80066;line-height:1;
 }
 #combo-sub{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
- 
+
 /* ── SHOP TOGGLE BUTTON (mobile only) ─────────────────────── */
 #shop-toggle{
   display:none;
@@ -54,7 +54,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
   transition:background .15s,transform .1s;
 }
 #shop-toggle:active{transform:scale(.93);}
- 
+
 /* ── SHOP PANEL ────────────────────────────────────────────── */
 #panel{
   position:absolute;top:0;right:0;bottom:0;width:var(--panel-w);
@@ -69,7 +69,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
   font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);
 }
 #panel-sub{font-size:10px;color:var(--muted);margin:2px 0 10px;letter-spacing:1px;}
- 
+
 /* Tabs */
 #tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
 .tab{
@@ -85,28 +85,28 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .tab-icon{font-size:16px;line-height:1;display:block;text-align:center;pointer-events:none;}
 .tab-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;display:block;text-align:center;white-space:nowrap;pointer-events:none;}
- 
+
 #panel-body{flex:1;overflow-y:auto;padding:10px;}
 #panel-body::-webkit-scrollbar{width:4px;}
 #panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
- 
+
 /* ── MOBILE ─────────────────────────────────────────────────── */
 @media(max-width:600px){
   :root{--panel-w:0px;}
- 
+
   body{cursor:auto;}
- 
+
   /* HUD stretches full width on mobile */
   #hud{right:0;padding:8px 10px;gap:12px;}
   .stat-val{font-size:24px;}
   .stat-lbl{font-size:9px;}
- 
+
   /* Hide save indicator on mobile */
   #save-ind{display:none;}
- 
+
   /* Show toggle button */
   #shop-toggle{display:flex;}
- 
+
   /* Panel becomes a bottom drawer */
   #panel{
     top:auto;right:0;left:0;bottom:0;width:100%;
@@ -116,18 +116,18 @@ canvas{position:absolute;top:0;left:0;display:block;}
     transform:translateY(100%);
   }
   #panel.open{transform:translateY(0);}
- 
+
   /* Drag handle on top of panel */
   #panel-header::before{
     content:'';display:block;
     width:40px;height:4px;border-radius:2px;
     background:var(--border2);margin:0 auto 10px;
   }
- 
+
   /* Combo text smaller on mobile */
   #combo-txt{font-size:36px;}
 }
- 
+
 /* Landscape mobile — side panel but narrower */
 @media(max-height:500px) and (max-width:900px){
   :root{--panel-w:220px;}
@@ -135,13 +135,13 @@ canvas{position:absolute;top:0;left:0;display:block;}
   .stat-val{font-size:26px;}
   #panel{width:220px;}
 }
- 
+
 .sec-lbl{
   font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;
   margin:10px 0 5px;padding-bottom:5px;border-bottom:1px solid var(--border);
 }
 .sec-lbl:first-child{margin-top:2px;}
- 
+
 /* Upgrade buttons */
 .upg{
   background:var(--surf2);border:1px solid var(--border);border-radius:8px;
@@ -162,7 +162,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .upg-bar{height:3px;background:#1e1e3a;border-radius:2px;margin:6px 0 4px;overflow:hidden;}
 .upg-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
 .upg-cost{font-size:12px;color:var(--gold);font-weight:700;}
- 
+
 /* Liquid / Hose tiles */
 .tile{
   background:var(--surf2);border:1px solid var(--border);border-radius:8px;
@@ -179,7 +179,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .tile-name{font-size:11px;font-weight:700;}
 .tile-right{text-align:right;font-size:10px;color:var(--muted);line-height:1.5;}
 .tile-right .sub{font-size:10px;color:var(--gold);}
- 
+
 /* Achievements */
 .ach{
   padding:8px 10px;border-radius:7px;border:1px solid var(--border);
@@ -191,7 +191,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .ach-desc{font-size:10px;color:var(--dim);margin-top:2px;}
 .ach-prog{font-size:9px;color:var(--muted);margin-top:3px;}
 .ach-count{font-size:10px;color:var(--muted);margin-bottom:6px;}
- 
+
 /* ── FLOATERS ──────────────────────────────────────────────── */
 #floaters{position:absolute;inset:0;pointer-events:none;z-index:25;overflow:hidden;}
 .floater{
@@ -204,7 +204,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
   0%{opacity:1;transform:translateX(-50%) translateY(0);}
   100%{opacity:0;transform:translateX(-50%) translateY(-55px);}
 }
- 
+
 /* ── TOAST ─────────────────────────────────────────────────── */
 #toast-area{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;}
 .toast{
@@ -217,14 +217,14 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .toast-tag{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
 .toast-name{font-size:14px;font-weight:700;color:#fff;margin-top:3px;}
 .toast-desc{font-size:10px;color:var(--muted);margin-top:2px;}
- 
+
 /* ── CURSOR ────────────────────────────────────────────────── */
 #cur{
   position:fixed;width:11px;height:11px;border:2px solid var(--accent);
   border-radius:50%;pointer-events:none;z-index:100;
   transform:translate(-50%,-50%);mix-blend-mode:screen;
 }
- 
+
 /* ── SAVE INDICATOR ────────────────────────────────────────── */
 #save-ind{
   position:absolute;bottom:10px;left:10px;font-size:9px;
@@ -247,7 +247,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 <div id="cur"></div>
 <div id="save-ind">⬡ auto-save</div>
 <button id="shop-toggle" onclick="toggleShop()">🛒</button>
- 
+
 <div id="panel">
   <div id="panel-header">
     <div id="panel-title">DRIP SHOP</div>
@@ -266,7 +266,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
     <div id="tab-ach" style="display:none"></div>
   </div>
 </div>
- 
+
 <script>
 // ════════════════════════════════════════════════════════
 // HELPERS
@@ -276,7 +276,7 @@ const rnd = (a,b) => Math.random()*(b-a)+a;
 const clamp = (v,lo,hi) => Math.max(lo,Math.min(hi,v));
 const lerp = (a,b,t) => a+(b-a)*t;
 const dst = (ax,ay,bx,by) => Math.sqrt((ax-bx)**2+(ay-by)**2);
- 
+
 // Infinite number formatting — handles up to e300+
 const SUFFIXES = [
   '','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc',
@@ -294,7 +294,7 @@ function fmt(n) {
   }
   return n.toExponential(2);
 }
- 
+
 // ════════════════════════════════════════════════════════
 // DATA — LIQUIDS
 // ════════════════════════════════════════════════════════
@@ -314,7 +314,7 @@ const LIQUIDS = {
   cosmicmilk: {name:'Cosmic Milk',  emoji:'🌌',color:'#f8f8ff',puddle:'#7986cb',pLight:'#f8f8ff30',gravity:.55,spread:2.2, mult:25000,sz:1.8, bounce:.40, cost:5e10,      revealAt:2e10,     desc:'×25K · galactic'},
   infinidrop: {name:'Infinidrop',   emoji:'♾️',color:'#ffd700',puddle:'#ff8f00',pLight:'#ffd70030',gravity:.50,spread:1.5, mult:1e6,  sz:1.0, bounce:.50, cost:1e13,      revealAt:5e12,     desc:'×1M · the end game liquid'},
 };
- 
+
 // ════════════════════════════════════════════════════════
 // DATA — HOSES
 // ════════════════════════════════════════════════════════
@@ -330,7 +330,7 @@ const HOSES = [
   {id:'omega',      name:'Omega Conduit',     icon:'♾️', desc:'The final pipe · max output', cost:80000000, flow:10.0,dmult:50.0, col:'#b8860b',hi:'#ffd700',revealAt:2.5e7  },
   {id:'godpipe',    name:'God Pipe',          icon:'✨', desc:'Transcends physics itself',   cost:5e9,      flow:25.0,dmult:200.0,col:'#e3f2fd',hi:'#ffffff',revealAt:2e9    },
 ];
- 
+
 // ════════════════════════════════════════════════════════
 // DATA — UPGRADES
 // tier: 1=always, 2=mid, 3=late, 4=endgame, 5=beyond
@@ -341,56 +341,79 @@ function mkCosts(base, factor, n) {
   for (let i=0;i<n;i++){c.push(Math.round(v));v*=factor;}
   return c;
 }
+
+// Upgrade cost at any level — uses stored costs array up to its length,
+// then extrapolates exponentially beyond that forever
+function upgCost(def, lvl){
+  if(lvl < def.costs.length) return def.costs[lvl];
+  // Beyond the table: last cost * factor^(lvl - lastIndex)
+  const last = def.costs[def.costs.length-1];
+  const factor = def.costs.length > 1
+    ? def.costs[def.costs.length-1] / def.costs[def.costs.length-2]
+    : 3;
+  return last * Math.pow(factor, lvl - (def.costs.length-1));
+}
+
+// Soft cap display — show level but no hard max
+function upgMaxed(def, lvl){ return false; } // nothing is ever truly maxed
+
 const UPGRADES = [
   // Tier 1
   {id:'flow',      name:'Flow Rate',       desc:'Lower drop cost → more drops from wiggle', icon:'⚡',tier:1,revealAt:0,
-    costs:mkCosts(30,2.6,15),max:15},
+    costs:mkCosts(30,2.6,15)},
   {id:'size',      name:'Drop Size',       desc:'Bigger drops → more fill+value', icon:'💦',tier:1,revealAt:0,
-    costs:mkCosts(40,2.7,15),max:15},
+    costs:mkCosts(40,2.7,15)},
   {id:'value',     name:'Drop Value',      desc:'More driplets per drop',         icon:'💰',tier:1,revealAt:0,
-    costs:mkCosts(80,2.8,15),max:15},
+    costs:mkCosts(80,2.8,15)},
   {id:'auto',      name:'Auto-Drip',       desc:'Passive drip, no wiggle needed', icon:'🤖',tier:1,revealAt:0,
-    costs:mkCosts(200,3.0,12),max:12},
+    costs:mkCosts(200,3.0,12)},
   {id:'wiggle',    name:'Wiggle Amp',      desc:'Wiggling produces more drops faster', icon:'🌀',tier:1,revealAt:0,
-    costs:mkCosts(60,2.5,12),max:12},
+    costs:mkCosts(60,2.5,12)},
   // Tier 2
   {id:'pressure',  name:'Water Pressure',  desc:'Drops fall faster',              icon:'💨',tier:2,revealAt:800,
-    costs:mkCosts(150,2.8,12),max:12},
+    costs:mkCosts(150,2.8,12)},
   {id:'combo',     name:'Combo Meter',     desc:'Longer combo window',            icon:'🔥',tier:2,revealAt:1500,
-    costs:mkCosts(250,2.9,12),max:12},
+    costs:mkCosts(250,2.9,12)},
   {id:'puddle',    name:'Puddle Magnet',   desc:'Drops pulled toward puddle',     icon:'🧲',tier:2,revealAt:3000,
-    costs:mkCosts(350,3.0,12),max:12},
+    costs:mkCosts(350,3.0,12)},
   {id:'splash',    name:'Splash Radius',   desc:'Bigger splashes = more score',   icon:'🌊',tier:2,revealAt:5000,
-    costs:mkCosts(300,2.8,12),max:12},
+    costs:mkCosts(300,2.8,12)},
   {id:'drain',     name:'Drain Bonus',     desc:'Bigger drain reward',            icon:'🛁',tier:2,revealAt:8000,
-    costs:mkCosts(600,3.1,12),max:12},
+    costs:mkCosts(600,3.1,12)},
   // Tier 3
   {id:'multidrip', name:'Multi-Drip',      desc:'Chance to spawn extra drops',    icon:'✌️',tier:3,revealAt:50000,
-    costs:mkCosts(8000,3.2,12),max:12},
+    costs:mkCosts(8000,3.2,12)},
   {id:'overflow',  name:'Overflow Mode',   desc:'Puddle overflow = ×2 bonus',     icon:'💥',tier:3,revealAt:120000,
-    costs:mkCosts(20000,3.3,12),max:12},
+    costs:mkCosts(20000,3.3,12)},
   {id:'gravity',   name:'Anti-Gravity',    desc:'Drops hang longer, grow larger', icon:'🪐',tier:3,revealAt:300000,
-    costs:mkCosts(50000,3.4,12),max:12},
+    costs:mkCosts(50000,3.4,12)},
   {id:'conductor', name:'Conductor',       desc:'Puddle magnet pulls harder',     icon:'⚡',tier:3,revealAt:600000,
-    costs:mkCosts(120000,3.5,12),max:12},
+    costs:mkCosts(120000,3.5,12)},
   // Tier 4
   {id:'prestige',  name:'Prestige Aura',   desc:'All income ×1.12 per level',     icon:'👑',tier:4,revealAt:1500000,
-    costs:mkCosts(500000,3.8,10),max:10},
+    costs:mkCosts(500000,3.8,10)},
   {id:'timewarp',  name:'Time Warp',       desc:'Auto-drip fires 2× faster',      icon:'⌛',tier:4,revealAt:5000000,
-    costs:mkCosts(2000000,4.0,10),max:10},
+    costs:mkCosts(2000000,4.0,10)},
   {id:'transcend', name:'Transcendence',   desc:'Puddle fill penalty halved',      icon:'✨',tier:4,revealAt:2e7,
-    costs:mkCosts(8000000,4.2,10),max:10},
+    costs:mkCosts(8000000,4.2,10)},
   {id:'singmind',  name:'Singular Mind',   desc:'Combo mult uncapped',             icon:'🧠',tier:4,revealAt:8e7,
-    costs:mkCosts(4e7,4.5,10),max:10},
+    costs:mkCosts(4e7,4.5,10)},
   // Tier 5 — Beyond
   {id:'genesis',   name:'Genesis Engine',  desc:'Every upgrade ×1.05 stronger',   icon:'🌌',tier:5,revealAt:5e8,
-    costs:mkCosts(2e8,5.0,8),max:8},
+    costs:mkCosts(2e8,5.0,8)},
   {id:'godhood',   name:'Godhood',         desc:'Drain reward ×10 per level',      icon:'☀️',tier:5,revealAt:5e9,
-    costs:mkCosts(2e9,5.5,8),max:8},
+    costs:mkCosts(2e9,5.5,8)},
   {id:'infinity',  name:'Infinity Loop',   desc:'Auto drops cost nothing·infinite',icon:'♾️',tier:5,revealAt:1e11,
-    costs:mkCosts(5e10,6.0,8),max:8},
+    costs:mkCosts(5e10,6.0,8)},
+  // Tier 6 — Post-Quadrillion (infinite scaling)
+  {id:'singularity',name:'Singularity',    desc:'Drop value ×2 per level — forever',icon:'🌀',tier:6,revealAt:1e12,
+    costs:mkCosts(1e12,8.0,5)},
+  {id:'omnipotence',name:'Omnipotence',    desc:'All multipliers ×1.5 per level',  icon:'🔮',tier:6,revealAt:1e13,
+    costs:mkCosts(5e12,9.0,5)},
+  {id:'darkflow',   name:'Dark Flow',      desc:'Drain gives ×100 extra per level', icon:'🖤',tier:6,revealAt:1e14,
+    costs:mkCosts(5e13,10.0,5)},
 ];
- 
+
 // ════════════════════════════════════════════════════════
 // DATA — ACHIEVEMENTS
 // ════════════════════════════════════════════════════════
@@ -413,14 +436,14 @@ const ACHIEVEMENTS = [
   {id:'drip1tg',     name:'Trigintadrip',           desc:'Earn 1 Trigintillion total driplets',      check:s=>s.lifeDrip>=1e93},
   {id:'drip1centil', name:'Centillionaire',         desc:'Earn 1 Centillion total driplets',         check:s=>s.lifeDrip>=1e303},
   {id:'drip_beyond', name:'Beyond Counting',        desc:'Numbers have lost all meaning',            check:s=>s.lifeDrip>=1e300},
- 
+
   // ── Score milestones ──────────────────────────────────────────────────────
   {id:'score1m',     name:'Scoreboard Entry',       desc:'Reach a score of 1 Million',               check:s=>s.score>=1e6},
   {id:'score1b',     name:'High Scorer',            desc:'Reach a score of 1 Billion',               check:s=>s.score>=1e9},
   {id:'score1t',     name:'Score God',              desc:'Reach a score of 1 Trillion',              check:s=>s.score>=1e12},
   {id:'score1qi',    name:'Scoreless',              desc:'Score means nothing at 1 Quintillion',     check:s=>s.score>=1e18},
   {id:'score1dc',    name:'Score: Unknowable',      desc:'1 Decillion score. Why even count.',       check:s=>s.score>=1e33},
- 
+
   // ── Spending ──────────────────────────────────────────────────────────────
   {id:'spent100k',   name:'Big Spender',            desc:'Spend 100K driplets total',                check:s=>s.totalSpent>=1e5},
   {id:'spent10m',    name:'Whale',                  desc:'Spend 10M driplets total',                 check:s=>s.totalSpent>=1e7},
@@ -431,7 +454,7 @@ const ACHIEVEMENTS = [
   {id:'spent1sx',    name:'Post-Economy',           desc:'Spend 1 Sextillion driplets total',        check:s=>s.totalSpent>=1e21},
   {id:'spent1dc',    name:'Money Is Meaningless',   desc:'Spend 1 Decillion driplets total',         check:s=>s.totalSpent>=1e33},
   {id:'spent_god',   name:'The Economy Is Gone',    desc:'Spend 1 Centillion driplets total',        check:s=>s.totalSpent>=1e303},
- 
+
   // ── Puddle drains ─────────────────────────────────────────────────────────
   {id:'drain1',      name:'Drain Day',              desc:'Drain your first puddle',                  check:s=>s.puddlesDone>=1},
   {id:'drain10',     name:'Serial Drainer',         desc:'Drain 10 puddles',                         check:s=>s.puddlesDone>=10},
@@ -445,7 +468,7 @@ const ACHIEVEMENTS = [
   {id:'drain1m',     name:'Drain Dimension',        desc:'Drain 1,000,000 puddles',                  check:s=>s.puddlesDone>=1000000},
   {id:'drain10m',    name:'Sisyphus Had It Easy',   desc:'Drain 10,000,000 puddles',                 check:s=>s.puddlesDone>=10000000},
   {id:'drain1b',     name:'The Eternal Plumber',    desc:'Drain 1 Billion puddles',                  check:s=>s.puddlesDone>=1e9},
- 
+
   // ── Puddle levels ─────────────────────────────────────────────────────────
   {id:'level10',     name:'Getting Serious',        desc:'Reach puddle level 10',                    check:s=>s.puddleLevel>=10},
   {id:'level100',    name:'Century Puddle',         desc:'Reach puddle level 100',                   check:s=>s.puddleLevel>=100},
@@ -456,7 +479,7 @@ const ACHIEVEMENTS = [
   {id:'level1b',     name:'Geological Scale',       desc:'Reach puddle level 1 Billion',             check:s=>s.puddleLevel>=1e9},
   {id:'level1t',     name:'Cosmic Time',            desc:'Reach puddle level 1 Trillion',            check:s=>s.puddleLevel>=1e12},
   {id:'level1qi',    name:'Heat Death Approach',    desc:'Reach puddle level 1 Quintillion',         check:s=>s.puddleLevel>=1e18},
- 
+
   // ── Combo ─────────────────────────────────────────────────────────────────
   {id:'combo10',     name:'On Fire',                desc:'Hit a ×10 combo on the puddle',            check:s=>s.maxCombo>=10},
   {id:'combo50',     name:'Unstoppable',            desc:'Hit a ×50 combo',                          check:s=>s.maxCombo>=50},
@@ -468,14 +491,14 @@ const ACHIEVEMENTS = [
   {id:'combo100k',   name:'One With The Hose',      desc:'Hit a ×100,000 combo',                     check:s=>s.maxCombo>=100000},
   {id:'combo1m',     name:'Combo Singularity',      desc:'×1,000,000 combo — are you even real?',    check:s=>s.maxCombo>=1000000},
   {id:'combo1b',     name:'Combo Deity',            desc:'×1 Billion combo. Seek help.',             check:s=>s.maxCombo>=1e9},
- 
+
   // ── Pipes ─────────────────────────────────────────────────────────────────
   {id:'pipe2',       name:'Upgrade Day',            desc:'Buy your first pipe upgrade',              check:s=>Object.values(s.hoses).filter(Boolean).length>=2},
   {id:'pipe5',       name:'Pipe Collector',         desc:'Unlock 5 pipes',                           check:s=>Object.values(s.hoses).filter(Boolean).length>=5},
   {id:'pipeall',     name:'Plumber Supreme',        desc:'Unlock all pipes',                         check:s=>HOSES.every(h=>s.hoses[h.id])},
   {id:'omega_pipe',  name:'The Omega',              desc:'Unlock the Omega Conduit',                 check:s=>s.hoses.omega},
   {id:'godpipe',     name:'God Pipe',               desc:'Unlock the God Pipe',                      check:s=>s.hoses.godpipe},
- 
+
   // ── Liquids ───────────────────────────────────────────────────────────────
   {id:'liq2',        name:'Taste Test',             desc:'Try a new liquid',                         check:s=>Object.values(s.liquids).filter(Boolean).length>=2},
   {id:'liq5',        name:'Mixologist',             desc:'Unlock 5 liquids',                         check:s=>Object.values(s.liquids).filter(Boolean).length>=5},
@@ -484,7 +507,7 @@ const ACHIEVEMENTS = [
   {id:'abyss_liq',   name:'Into The Void',          desc:'Unlock Abyss liquid',                      check:s=>s.liquids.abyss},
   {id:'infinidrop',  name:'Infinidrop',             desc:'Unlock the Infinidrop liquid',             check:s=>s.liquids.infinidrop},
   {id:'cosmicmilk',  name:'Galactic Dairy',         desc:'Unlock Cosmic Milk',                       check:s=>s.liquids.cosmicmilk},
- 
+
   // ── Upgrades ──────────────────────────────────────────────────────────────
   {id:'first_upg',   name:'First Upgrade',          desc:'Buy any upgrade',                          check:s=>Object.values(s.upgrades).some(v=>v>0)},
   {id:'prestige_max',name:'Prestige Max',           desc:'Max out Prestige Aura',                    check:s=>(s.upgrades.prestige||0)>=10},
@@ -493,7 +516,7 @@ const ACHIEVEMENTS = [
   {id:'genesis_max', name:'Genesis Max',            desc:'Max out Genesis Engine',                   check:s=>(s.upgrades.genesis||0)>=8},
   {id:'transcend_max',name:'Transcendent',          desc:'Max out Transcendence',                    check:s=>(s.upgrades.transcend||0)>=10},
   {id:'upg_all',     name:'The Completionist',      desc:'Max every single upgrade',                 check:s=>UPGRADES.every(u=>(s.upgrades[u.id]||0)>=u.max)},
- 
+
   // ── Secret / skill ────────────────────────────────────────────────────────
   {id:'zen',           name:'Zen Master',             desc:'Let auto-drip fill a full puddle without touching the mouse', check:s=>s._zenPuddle>=1},
   {id:'speed_puddle',  name:'Speed Drip',             desc:'Fill a puddle in under 30 seconds',        check:s=>s._fastPuddle>=1},
@@ -505,7 +528,7 @@ const ACHIEVEMENTS = [
   {id:'heartbreaker',  name:'Heartbreaker',            desc:'Break a ×100+ combo with a miss',          check:s=>s._brokeCombo100>=1},
   {id:'heartbreaker500',name:'Serial Heartbreaker',   desc:'Break a ×500+ combo with a miss',          check:s=>s._brokeCombo500>=1},
   {id:'heartbreaker10k',name:'Combo Murderer',        desc:'Break a ×10,000+ combo with a miss',       check:s=>s._brokeCombo10k>=1},
- 
+
   // ── The impossible tier ───────────────────────────────────────────────────
   {id:'drip1e100',   name:'Googoldrip',              desc:'Earn a googol (1e100) total driplets',     check:s=>s.lifeDrip>=1e100},
   {id:'level1e15',   name:'Eon Runner',              desc:'Reach puddle level 1 Quadrillion',         check:s=>s.puddleLevel>=1e15},
@@ -515,7 +538,7 @@ const ACHIEVEMENTS = [
   {id:'score1e30',   name:'Score Singularity',       desc:'Reach a score of 1 Nonillion',             check:s=>s.score>=1e30},
   {id:'all_achs',    name:'∞ The True Completionist',desc:'Unlock every other achievement. You win.',  check:s=>ACHIEVEMENTS.filter(a=>a.id!=='all_achs').every(a=>s.achievements[a.id])},
 ];
- 
+
 // ════════════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════════════
@@ -558,7 +581,7 @@ UPGRADES.forEach(u=>S.upgrades[u.id]=0);
 // zero all liquid/hose keys
 Object.keys(LIQUIDS).forEach(k=>{if(k!=='water')S.liquids[k]=false;});
 HOSES.forEach(h=>{if(h.id!=='garden')S.hoses[h.id]=false;});
- 
+
 // ════════════════════════════════════════════════════════
 // CANVAS
 // ════════════════════════════════════════════════════════
@@ -567,13 +590,13 @@ const canvas=$('c'), ctx=canvas.getContext('2d');
 function visH(){ return (window.visualViewport ? window.visualViewport.height : window.innerHeight); }
 function groundY(){ return visH() - 80; }
 const PANEL_W=()=>window.innerWidth<=600?0:window.innerWidth<=900&&window.innerHeight<=500?220:300;
- 
+
 function toggleShop(){
   const p=$('panel');
   const open=p.classList.toggle('open');
   $('shop-toggle').textContent=open?'✕':'🛒';
 }
- 
+
 // Swipe down on panel to close it (mobile)
 (()=>{
   let startY=0;
@@ -607,7 +630,7 @@ canvas.style.width=(window.innerWidth-PANEL_W())+'px';
 canvas.style.height=visH()+'px';
 window.addEventListener('resize',resize);
 if(window.visualViewport) window.visualViewport.addEventListener('resize',resize);
- 
+
 // ════════════════════════════════════════════════════════
 // SAVE / LOAD
 // ════════════════════════════════════════════════════════
@@ -619,6 +642,7 @@ function saveGame(){
     puddlesDone:S.puddlesDone,maxCombo:S.maxCombo,
     puddleRadius:S.puddle.radius,puddleMaxRadius:S.puddle.maxRadius,
     currentLiquid:S.currentLiquid,currentHose:S.currentHose,
+    prestigeCount:S.prestigeCount||0,
     upgrades:S.upgrades,liquids:S.liquids,hoses:S.hoses,
     achievements:S.achievements,
   };
@@ -640,20 +664,21 @@ function loadGame(){
     S.puddle.maxRadius=d.puddleMaxRadius||200;
     S.currentLiquid=d.currentLiquid||'water';
     S.currentHose=d.currentHose||'garden';
+    S.prestigeCount=d.prestigeCount||0;
     if(d.upgrades)Object.assign(S.upgrades,d.upgrades);
     if(d.liquids)Object.assign(S.liquids,d.liquids);
     if(d.hoses)Object.assign(S.hoses,d.hoses);
     if(d.achievements)Object.assign(S.achievements,d.achievements);
   }catch(e){console.warn('Load failed',e);}
 }
- 
+
 // ════════════════════════════════════════════════════════
 // GAME HELPERS
 // ════════════════════════════════════════════════════════
 function liq(){return LIQUIDS[S.currentLiquid]||LIQUIDS.water;}
 function hose(){return HOSES.find(h=>h.id===S.currentHose)||HOSES[0];}
 function upg(id){return S.upgrades[id]||0;}
- 
+
 function genesisBonus(){return Math.pow(1.05,upg('genesis'));}
 function flowInterval(){
   const base=1600,red=upg('flow')*105,pres=upg('pressure')*.05,tw=upg('timewarp')*.15;
@@ -664,12 +689,15 @@ function dropRadius(){
   const raw=(4+upg('size')*1.2)*liq().sz*Math.sqrt(hose().dmult)*(1+upg('gravity')*.10)*genesisBonus();
   return clamp(raw,3,22);
 }
+function prestigeBonus(){return Math.pow(2,S.prestigeCount||0);}
 function dropValue(){
   const h=hose(),l=liq();
   const vm=1+upg('value')*.38,szm=1+upg('size')*.12,spm=1+upg('splash')*.10;
   const hm=1+(h.dmult-1)*.45,pm=Math.pow(1.12,upg('prestige'));
   const gm=genesisBonus();
-  return vm*szm*spm*hm*pm*gm*l.mult;
+  const singMod=Math.pow(2,upg('singularity')||0);
+  const omnMod=Math.pow(1.5,upg('omnipotence')||0);
+  return vm*szm*spm*hm*pm*gm*singMod*omnMod*l.mult*prestigeBonus();
 }
 function wiggle(){return 1+upg('wiggle')*.45;}
 function autoInterval(){
@@ -684,7 +712,8 @@ function comboMult(){
   return 1+Math.min(S.combo*.055,cap)*(1+upg('combo')*.08);
 }
 function drainBonus(){
-  return (1+upg('drain')*.32)*Math.pow(10,upg('godhood')*.6)*genesisBonus();
+  const darkFlow=Math.pow(100,upg('darkflow')||0);
+  return (1+upg('drain')*.32)*Math.pow(10,upg('godhood')*.6)*genesisBonus()*darkFlow*prestigeBonus();
 }
 function magnetForce(){return(upg('puddle')*.05+upg('conductor')*.08)*genesisBonus();}
 function fillAmt(r,spread){
@@ -694,7 +723,7 @@ function fillAmt(r,spread){
 }
 function multiChance(){return Math.min(upg('multidrip')*.07,.85);}
 function visible(revealAt){return(S.totalSpent||0)>=revealAt;}
- 
+
 // ════════════════════════════════════════════════════════
 // PARTICLES & FLOATERS — all canvas-rendered, hard capped
 // ════════════════════════════════════════════════════════
@@ -702,10 +731,10 @@ const MAX_PARTICLES = 120;
 const MAX_SPLASHES  = 20;
 const MAX_RINGS     = 15;
 const MAX_FLOATERS  = 20;
- 
+
 // Canvas-rendered floaters — no DOM elements
 S.floaters = [];
- 
+
 function splash(x,y,liqObj,n){
   // Cap incoming particles
   const space = MAX_PARTICLES - S.particles.length;
@@ -718,7 +747,7 @@ function splash(x,y,liqObj,n){
   if(S.splashes.length < MAX_SPLASHES)
     S.splashes.push({x,y,r:4,maxR:30,life:1,col:liqObj.color});
 }
- 
+
 // Throttle: only show a floater every N ms per position to avoid flood
 let _lastFloatTime = 0;
 function floatTxt(x,y,txt,col){
@@ -730,7 +759,7 @@ function floatTxt(x,y,txt,col){
   if(S.floaters.length >= MAX_FLOATERS) S.floaters.shift();
   S.floaters.push({x, y, txt, col, life:1, vy:-1.2});
 }
- 
+
 // ════════════════════════════════════════════════════════
 // DROP PHYSICS
 // ════════════════════════════════════════════════════════
@@ -752,7 +781,7 @@ function creditDrop(){
   if(S.combo>S.maxCombo)S.maxCombo=S.combo;
   updateHUD();
 }
- 
+
 function spawnDrop(fromAuto=false){
   const l=liq(),w=wiggle();
   const vx=S.hoseBendVel*.35+rnd(-1.5,1.5)*l.spread*w;
@@ -765,23 +794,23 @@ function spawnDrop(fromAuto=false){
   }
   if(!fromAuto)S._puddleTouchedByMouse=true;
 }
- 
+
 function dropLanded(d){
   const l=LIQUIDS[d.liqId]||LIQUIDS.water;
   const val=dropValue();
   const cm=comboMult();
   // No arbitrary cap — number formatting handles big numbers
   const earned=Math.max(1,Math.round(val*cm));
- 
+
   S.score+=earned*10;
   S.driplets+=earned;
   S.lifeDrip+=earned;
   S.shake=Math.min(S.shake+1.2,5);
- 
+
   const onPuddle=dst(d.x,d.y,S.puddle.x,S.puddle.y)<S.puddle.radius*1.5;
   const grow=fillAmt(d.r,l.spread)*(onPuddle?1.3:.42);
   S.puddle.radius=Math.min(S.puddle.maxRadius,S.puddle.radius+grow);
- 
+
   // Combo only builds on puddle hits — misses reset it
   if(onPuddle){
     S.combo++;
@@ -797,18 +826,18 @@ function dropLanded(d){
     S.comboTimer=0;
     $('combo-wrap').style.opacity='0';
   }
- 
+
   // Overflow bonus
   if(S.puddle.radius>=S.puddle.maxRadius&&upg('overflow')>0){
     const bonus=Math.round(earned*upg('overflow')*.4);
     S.driplets+=bonus;S.lifeDrip+=bonus;
     if(bonus>0)floatTxt(d.x,d.y-30,`overflow +${fmt(bonus)}`,'#ff6600');
   }
- 
+
   if(S.puddle.radius>=S.puddle.maxRadius&&!S.plug){
     S.plug={x:S.puddle.x,y:S.puddle.y-32,bob:0,draining:false,prog:0};
   }
- 
+
   for(let i=0;i<S.puddle.noise.length;i++){
     S.puddle.noiseT[i]+=rnd(-5,5);
     S.puddle.noiseT[i]=clamp(S.puddle.noiseT[i],-18,18);
@@ -817,14 +846,14 @@ function dropLanded(d){
   floatTxt(d.x,d.y-18,`+${fmt(earned)}`,l.color);
   updateHUD();
 }
- 
+
 // ════════════════════════════════════════════════════════
 // UPDATE
 // ════════════════════════════════════════════════════════
 let lastTs=0;
 function update(ts){
   const dt=Math.min(ts-lastTs,50);lastTs=ts;
- 
+
   // Hose spring
   const maxB=canvas.width*.36*wiggle();
   const target=S.mouseHeld?((S.mouseX/canvas.width)-.5)*2*maxB:0;
@@ -835,11 +864,11 @@ function update(ts){
   S.nozzleX=S.hoseBaseX+S.hoseBend;
   S.nozzleY=S.hoseBaseY+S.hoseLen;
   S.shake*=.88;
- 
+
   // ── Drop spawning: wiggle = more drops ──────────────────
   // How fast the nozzle tip is moving this frame
   const nozzleSpeed=Math.abs(S.hoseBendVel);
- 
+
   if(S.mouseHeld){
     // Wiggle pressure: fast movement fills the bucket quickly.
     // Wiggle Amp upgrade multiplies the contribution.
@@ -847,9 +876,9 @@ function update(ts){
     const wiggleContrib = nozzleSpeed * (0.08 + upg('wiggle') * 0.04);
     const baseTrickle   = 0.002;
     S.dropPressure = (S.dropPressure||0) + (baseTrickle + wiggleContrib) * dt;
- 
+
     const dropCost = Math.max(40, 800 - upg('flow') * 50);
- 
+
     while(S.dropPressure >= dropCost){
       S.dropPressure -= dropCost;
       if(S.drops.length < 60){
@@ -863,26 +892,26 @@ function update(ts){
     // Bleed pressure when not held so it doesn't instantly burst on re-click
     S.dropPressure = Math.max(0, (S.dropPressure||0) - dt * 0.05);
   }
- 
+
   // Auto-drip
   if(upg('auto')>0){
     S.autoTimer+=dt;
     if(S.autoTimer>=autoInterval()){S.autoTimer=0;spawnDrop();}
   }
- 
+
   // Combo decay
   if(S.comboTimer>0){
     S.comboTimer-=dt;
     if(S.comboTimer<=0){S.combo=0;$('combo-wrap').style.opacity='0';}
   }
- 
+
   // Puddle noise
   for(let i=0;i<S.puddle.noise.length;i++){
     S.puddle.noise[i]=lerp(S.puddle.noise[i],S.puddle.noiseT[i],.04);
     S.puddle.noiseT[i]+=rnd(-.4,.4);
     S.puddle.noiseT[i]*=.97;
   }
- 
+
   // Plug drain
   if(S.plug){
     S.plug.bob=Math.sin(Date.now()*.003)*5;
@@ -904,7 +933,7 @@ function update(ts){
       }
     }
   }
- 
+
   // Drop physics
   const gnd=groundY();
   const mag=magnetForce();
@@ -929,7 +958,7 @@ function update(ts){
       }else{dropLanded(d);S.drops.splice(i,1);}
     }
   }
- 
+
   // Particles
   for(let i=S.particles.length-1;i>=0;i--){
     const p=S.particles[i];
@@ -947,14 +976,14 @@ function update(ts){
     f.y+=f.vy;f.life-=.025;
     if(f.life<=0)S.floaters.splice(i,1);
   }
- 
+
   // Periodic tasks
   S._shopTimer+=dt;if(S._shopTimer>4000){S._shopTimer=0;buildShop();}
   S._saveTimer+=dt;if(S._saveTimer>30000){S._saveTimer=0;saveGame();}
   S._milTimer+=dt;if(S._milTimer>2000){S._milTimer=0;checkMilestones();}
- 
+
   updateFX(dt);
- 
+
   // Combo display
   if(S.combo>=3){
     $('combo-wrap').style.opacity='1';
@@ -962,11 +991,11 @@ function update(ts){
     $('combo-txt').style.fontSize=Math.min(30+S.combo*.8,72)+'px';
   }
 }
- 
+
 // ════════════════════════════════════════════════════════
 // DRAW
 // ════════════════════════════════════════════════════════
- 
+
 // Ambient state — smoothly interpolated
 const FX = {
   intensity: 0,   // 0–1, driven by drop rate + combo
@@ -976,20 +1005,20 @@ const FX = {
   pulseRings: [], // shockwave rings [{x,y,r,maxR,life,col}]
   bgParticles: [], // floating ambient specks
 };
- 
+
 // Seed bg particles
 for(let i=0;i<40;i++) FX.bgParticles.push({
   x:rnd(0,800),y:rnd(0,600),vy:rnd(-.3,-.08),vx:rnd(-.1,.1),
   r:rnd(.8,2.5),life:rnd(0,1),col:'#ffffff'
 });
- 
+
 function updateFX(dt){
   // Intensity driven by drop pressure + combo
   const dropActivity = Math.min((S.dropPressure||0)/200, 1);
   const comboActivity = Math.min(S.combo/50, 1);
   const targetIntensity = Math.max(dropActivity, comboActivity * .8);
   FX.intensity = lerp(FX.intensity, targetIntensity, .04);
- 
+
   // Background hue follows current liquid color
   const l = liq();
   const hueMap = {
@@ -999,10 +1028,10 @@ function updateFX(dt){
   };
   FX.bgHueTarget = hueMap[S.currentLiquid] || 220;
   FX.bgHue = lerp(FX.bgHue, FX.bgHueTarget, .015);
- 
+
   // Flash decay
   FX.flash = Math.max(0, FX.flash - dt * .004);
- 
+
   // Pulse rings
   for(let i=FX.pulseRings.length-1;i>=0;i--){
     const r=FX.pulseRings[i];
@@ -1010,7 +1039,7 @@ function updateFX(dt){
     r.life -= .035;
     if(r.life<=0) FX.pulseRings.splice(i,1);
   }
- 
+
   // Ambient bg particles — drift upward, wrap
   for(const p of FX.bgParticles){
     p.x += p.vx + Math.sin(Date.now()*.0005+p.y*.01)*.15;
@@ -1020,7 +1049,7 @@ function updateFX(dt){
     p.col = l.color;
   }
 }
- 
+
 function triggerDrainFX(){
   FX.flash = 1;
   // Big shockwave from puddle center
@@ -1033,7 +1062,7 @@ function triggerDrainFX(){
     });
   }
 }
- 
+
 function triggerHitFX(x, y, col, combo){
   if(FX.pulseRings.length < MAX_RINGS)
     FX.pulseRings.push({x, y, r:4, maxR:clamp(20+combo*.4, 20, 70), life:1, col});
@@ -1047,7 +1076,7 @@ function triggerHitFX(x, y, col, combo){
     }
   }
 }
- 
+
 function drawFloaters(){
   ctx.save();
   ctx.textAlign='center';
@@ -1063,11 +1092,11 @@ function drawFloaters(){
   ctx.globalAlpha=1;
   ctx.restore();
 }
- 
+
 function draw(){
   ctx.save();
   if(S.shake>.3){ctx.translate(rnd(-S.shake,S.shake),rnd(-S.shake*.4,S.shake*.4));}
- 
+
   drawBackground();
   drawGrid();
   drawPulseRings();
@@ -1081,26 +1110,26 @@ function draw(){
   drawFloaters();
   drawVignette();
   drawFlash();
- 
+
   ctx.restore();
 }
- 
+
 function hexRgb(hex){
   const h=hex.replace('#','');
   return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
 }
 function rgba(hex,a){const [r,g,b]=hexRgb(hex);return `rgba(${r},${g},${b},${a})`;}
- 
+
 function drawBackground(){
   const intensity=FX.intensity;
   const l=liq();
- 
+
   // Base dark bg — hue shifts with liquid
   const sat=Math.round(15+intensity*25);
   const lig=Math.round(4+intensity*6);
   ctx.fillStyle=`hsl(${Math.round(FX.bgHue)},${sat}%,${lig}%)`;
   ctx.fillRect(0,0,canvas.width,canvas.height);
- 
+
   // Radial glow from bottom — brightens with intensity
   const gSize=canvas.height*(.6+intensity*.5);
   const bg=ctx.createRadialGradient(canvas.width/2,canvas.height,0,canvas.width/2,canvas.height,gSize);
@@ -1108,7 +1137,7 @@ function drawBackground(){
   bg.addColorStop(1,'transparent');
   ctx.fillStyle=bg;
   ctx.fillRect(0,0,canvas.width,canvas.height);
- 
+
   // Ambient drifting particles
   ctx.save();
   for(const p of FX.bgParticles){
@@ -1120,7 +1149,7 @@ function drawBackground(){
   ctx.globalAlpha=1;
   ctx.restore();
 }
- 
+
 function drawPulseRings(){
   for(const r of FX.pulseRings){
     ctx.beginPath();
@@ -1130,7 +1159,7 @@ function drawPulseRings(){
     ctx.stroke();
   }
 }
- 
+
 function drawVignette(){
   // Dark vignette that pulses inward on high intensity
   const spread = .45 + FX.intensity * .15;
@@ -1143,13 +1172,13 @@ function drawVignette(){
   ctx.fillStyle=vg;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 }
- 
+
 function drawFlash(){
   if(FX.flash<=0)return;
   ctx.fillStyle=rgba(liq().color, FX.flash*.35);
   ctx.fillRect(0,0,canvas.width,canvas.height);
 }
- 
+
 function drawGrid(){
   ctx.save();
   ctx.strokeStyle='rgba(255,255,255,0.018)';
@@ -1159,7 +1188,7 @@ function drawGrid(){
   for(let y=0;y<canvas.height;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
   ctx.restore();
 }
- 
+
 function drawGround(){
   const gy=groundY();
   ctx.fillStyle='#0b0b1a';
@@ -1172,17 +1201,17 @@ function drawGround(){
   g.addColorStop(0,l.pLight);g.addColorStop(1,'transparent');
   ctx.fillStyle=g;ctx.fillRect(0,gy-5,canvas.width,10);
 }
- 
+
 function drawPuddle(){
   const p=S.puddle,segs=p.noise.length,l=liq();
   ctx.save();ctx.translate(p.x,p.y);
- 
+
   // Outer glow
   const gg=ctx.createRadialGradient(0,0,0,0,0,p.radius*1.5);
   gg.addColorStop(0,l.pLight);gg.addColorStop(1,'transparent');
   ctx.fillStyle=gg;
   ctx.beginPath();ctx.ellipse(0,0,p.radius*1.6,p.radius*.5,0,0,Math.PI*2);ctx.fill();
- 
+
   // Body
   ctx.beginPath();
   for(let i=0;i<=segs;i++){
@@ -1201,7 +1230,7 @@ function drawPuddle(){
   ctx.strokeStyle=l.color+'55';ctx.lineWidth=1.5;ctx.stroke();
   ctx.restore();
 }
- 
+
 function drawSplashes(){
   for(const s of S.splashes){
     ctx.beginPath();ctx.ellipse(s.x,s.y,s.r,s.r*.28,0,0,Math.PI*2);
@@ -1241,13 +1270,13 @@ function drawDrops(){
     ctx.restore();
   }
 }
- 
+
 function drawHose(){
   const bx=S.hoseBaseX,by=S.hoseBaseY,nx=S.nozzleX,ny=S.nozzleY;
   const h=hose(),l=liq();
   const cx=bx+(nx-bx)*.45,cy=by+(ny-by)*.55;
   ctx.save();ctx.lineCap='round';
- 
+
   // Tube layers
   [[22,'#0d0d1e'],[15,h.col],[8,h.hi]].forEach(([lw,col])=>{
     ctx.lineWidth=lw;ctx.strokeStyle=col;
@@ -1257,18 +1286,18 @@ function drawHose(){
   ctx.lineWidth=2;ctx.strokeStyle=h.hi+'55';ctx.setLineDash([8,14]);
   ctx.beginPath();ctx.moveTo(bx,by);ctx.quadraticCurveTo(cx,cy,nx,ny);ctx.stroke();
   ctx.setLineDash([]);
- 
+
   // Wall bracket
   ctx.fillStyle='#2a2a5a';ctx.beginPath();ctx.rect(bx-18,by-12,36,12);ctx.fill();
   ctx.fillStyle='#3a3a7a';ctx.beginPath();ctx.rect(bx-10,by-20,20,10);ctx.fill();
- 
+
   // Nozzle
   const ang=Math.atan2(ny-cy,nx-cx);
   ctx.save();ctx.translate(nx,ny);ctx.rotate(ang-Math.PI/2);
   ctx.fillStyle=h.col;ctx.beginPath();ctx.rect(-9,-4,18,20);ctx.fill();
   ctx.fillStyle=h.hi;ctx.beginPath();ctx.rect(-6,12,12,8);ctx.fill();
   ctx.restore();
- 
+
   // Drip at tip
   const tipX=nx+Math.cos(ang)*20,tipY=ny+Math.sin(ang)*20;
   const ds=2.5+Math.sin(Date.now()*.003)*2;
@@ -1276,7 +1305,7 @@ function drawHose(){
   ctx.fillStyle=l.color+'cc';ctx.fill();
   ctx.restore();
 }
- 
+
 function drawPlug(){
   if(!S.plug)return;
   const p=S.plug,l=liq();
@@ -1315,7 +1344,7 @@ function drawPlug(){
   }
   ctx.globalAlpha=1;ctx.restore();
 }
- 
+
 // ════════════════════════════════════════════════════════
 // HUD
 // ════════════════════════════════════════════════════════
@@ -1325,7 +1354,7 @@ function updateHUD(){
   $('h-puddle').textContent=Math.round((S.puddle.radius/S.puddle.maxRadius)*100)+'%';
   $('h-level').textContent=S.puddleLevel;
 }
- 
+
 // ════════════════════════════════════════════════════════
 // SHOP
 // ════════════════════════════════════════════════════════
@@ -1338,40 +1367,58 @@ function switchTab(t, btn){
   $('tab-'+t).style.display='block';
   if(t==='ach')buildAchTab();
 }
- 
+
 function buildShop(){
   buildUpgradesTab();
   buildPipesTab();
   buildLiquidsTab();
 }
- 
+
 function buildUpgradesTab(){
   const el=$('tab-upgrades');el.innerHTML='';
-  const tiers={1:'Tier 1 — Core',2:'Tier 2 — Mid Game',3:'Tier 3 — Late Game',4:'Tier 4 — End Game',5:'Tier 5 — Beyond'};
+
+  // Prestige reset — unlocks at 1 quadrillion lifetime driplets
+  if(S.lifeDrip>=1e15){
+    const pc=S.prestigeCount||0;
+    const nextMult=Math.pow(2,pc+1);
+    const sec=document.createElement('div');sec.className='sec-lbl';sec.textContent='⚡ Prestige';el.appendChild(sec);
+    const box=document.createElement('div');
+    box.style.cssText='background:#1a0a00;border:1px solid #ff660055;border-radius:8px;padding:10px 12px;margin-bottom:8px;';
+    box.innerHTML=`<div style="font-size:12px;font-weight:700;color:#ff8800">🔁 PRESTIGE RESET</div>
+      <div style="font-size:10px;color:#9090c0;margin-top:3px">Reset driplets &amp; upgrades. Keep liquids, pipes &amp; achievements.</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:5px">Next bonus: <b>×${fmt(nextMult)} permanent income</b></div>
+      <div style="font-size:10px;color:var(--muted)">Current: ×${fmt(Math.pow(2,pc))} (Prestige ${pc})</div>`;
+    const pbtn=document.createElement('button');
+    pbtn.style.cssText='margin-top:8px;width:100%;background:#ff440022;border:1px solid #ff4400aa;border-radius:6px;padding:8px;color:#ff6600;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;cursor:pointer;';
+    pbtn.textContent='⚡ PRESTIGE NOW';
+    pbtn.addEventListener('click',doPrestige);
+    box.appendChild(pbtn);el.appendChild(box);
+  }
+
+  const tiers={1:'Tier 1 — Core',2:'Tier 2 — Mid',3:'Tier 3 — Late',4:'Tier 4 — End Game',5:'Tier 5 — Beyond',6:'Tier 6 — ∞ Infinite'};
   let lastTier=0;
   for(const def of UPGRADES){
     if(!visible(def.revealAt))continue;
     if(def.tier!==lastTier){
-      const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent=tiers[def.tier];el.appendChild(lbl);
+      const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent=tiers[def.tier]||'Beyond';el.appendChild(lbl);
       lastTier=def.tier;
     }
-    const lvl=upg(def.id),maxed=lvl>=def.max,cost=maxed?null:def.costs[lvl];
-    const can=!maxed&&S.driplets>=cost;
+    const lvl=upg(def.id);
+    const cost=upgCost(def,lvl);
+    const can=S.driplets>=cost;
     const btn=document.createElement('button');
-    btn.className='upg'+(maxed?' maxed':can?' can':'');
-    btn.disabled=maxed;
-    btn.innerHTML=`<div class="upg-top"><span class="upg-name">${def.icon} ${def.name}</span><span class="upg-lvl">${lvl}/${def.max}</span></div>
+    btn.className='upg'+(can?' can':'');
+    btn.innerHTML=`<div class="upg-top"><span class="upg-name">${def.icon} ${def.name}</span><span class="upg-lvl" style="color:var(--accent)">Lv.${lvl}</span></div>
       <div class="upg-desc">${def.desc}</div>
-      <div class="upg-bar"><div class="upg-bar-fill" style="width:${(lvl/def.max)*100}%"></div></div>
-      <div class="upg-cost">${maxed?'✓ MAXED':'💧 '+fmt(cost)}</div>`;
-    if(!maxed)btn.addEventListener('click',()=>{
-      const c=def.costs[upg(def.id)];
-      if(S.driplets>=c){S.driplets-=c;S.totalSpent+=c;S.upgrades[def.id]++;updateHUD();buildShop();checkMilestones();}
+      <div class="upg-cost">💧 ${fmt(cost)}</div>`;
+    btn.addEventListener('click',()=>{
+      const c=upgCost(def,upg(def.id));
+      if(S.driplets>=c){S.driplets-=c;S.totalSpent+=c;S.upgrades[def.id]=(S.upgrades[def.id]||0)+1;updateHUD();buildShop();checkMilestones();}
     });
     el.appendChild(btn);
   }
 }
- 
+
 function buildPipesTab(){
   const el=$('tab-pipes');el.innerHTML='';
   const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Pipes & Hoses';el.appendChild(lbl);
@@ -1391,7 +1438,7 @@ function buildPipesTab(){
     el.appendChild(btn);
   }
 }
- 
+
 function buildLiquidsTab(){
   const el=$('tab-liquids');el.innerHTML='';
   const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Liquids';el.appendChild(lbl);
@@ -1410,7 +1457,28 @@ function buildLiquidsTab(){
     el.appendChild(btn);
   }
 }
- 
+
+function doPrestige(){
+  if(!confirm('Prestige reset? Lose driplets & upgrades, keep liquids/pipes/achievements, gain permanent income multiplier.')) return;
+  S.prestigeCount = (S.prestigeCount||0) + 1;
+  // Reset progress
+  S.driplets = 0;
+  S.score = 0;
+  S.totalSpent = 0;
+  S.puddleLevel = 1;
+  S.puddle.radius = 25;
+  S.puddle.maxRadius = 200;
+  S.combo = 0; S.comboTimer = 0;
+  S.plug = null;
+  UPGRADES.forEach(u=>S.upgrades[u.id]=0);
+  // Keep: lifeDrip, liquids, hoses, achievements, prestigeCount
+  updateHUD(); buildShop(); checkMilestones();
+  floatTxt(canvas.width/2, canvas.height/2, `⚡ PRESTIGE ${S.prestigeCount}!`, '#ff8800');
+  saveGame();
+}
+
+function prestigeBonus(){ return Math.pow(2, S.prestigeCount||0); }
+
 function buildAchTab(){
   const el=$('tab-ach');el.innerHTML='';
   const got=ACHIEVEMENTS.filter(a=>S.achievements[a.id]);
@@ -1424,7 +1492,7 @@ function buildAchTab(){
     el.appendChild(div);
   }
 }
- 
+
 // ════════════════════════════════════════════════════════
 // ACHIEVEMENTS
 // ════════════════════════════════════════════════════════
@@ -1438,7 +1506,7 @@ function checkMilestones(){
     }
   }
 }
- 
+
 function showToast(a){
   const wrap=$('toast-area');
   const t=document.createElement('div');t.className='toast';
@@ -1449,12 +1517,12 @@ function showToast(a){
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .6s';},3000);
   setTimeout(()=>t.remove(),3700);
 }
- 
+
 // ════════════════════════════════════════════════════════
 // INPUT
 // ════════════════════════════════════════════════════════
 const cur=$('cur');
- 
+
 // Convert raw clientX/clientY → canvas pixel coords, accounting for zoom/scale
 function toCanvas(cx,cy){
   const r=canvas.getBoundingClientRect();
@@ -1462,7 +1530,7 @@ function toCanvas(cx,cy){
   const scaleY=canvas.height/r.height;
   return {x:(cx-r.left)*scaleX, y:(cy-r.top)*scaleY};
 }
- 
+
 function handleMove(cx,cy){
   const p=toCanvas(cx,cy);
   S.mouseX=clamp(p.x,0,canvas.width);
@@ -1489,7 +1557,7 @@ window.addEventListener('mousedown',e=>{
 });
 window.addEventListener('mouseup',()=>{S.mouseHeld=false;});
 window.addEventListener('mouseleave',()=>{S.mouseHeld=false;});
- 
+
 // Touch on canvas only — panel handles its own scroll natively
 canvas.addEventListener('touchstart',e=>{
   handleClick(e.touches[0].clientX,e.touches[0].clientY);
@@ -1502,7 +1570,7 @@ canvas.addEventListener('touchmove',e=>{
 },{passive:false});
 canvas.addEventListener('touchend',()=>{S.mouseHeld=false;});
 window.addEventListener('touchend',()=>{S.mouseHeld=false;});
- 
+
 // ════════════════════════════════════════════════════════
 // INIT & LOOP
 // ════════════════════════════════════════════════════════
@@ -1514,12 +1582,11 @@ S.nozzleY=S.hoseBaseY+S.hoseLen;
 S.mouseX=canvas.width/2;
 S.puddle.x=canvas.width/2;
 S.puddle.y=groundY();
- 
+
 buildShop();updateHUD();checkMilestones();
- 
+
 function loop(ts){update(ts);draw();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
 </script>
 </body>
 </html>
- 
