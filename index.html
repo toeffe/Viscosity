@@ -575,8 +575,6 @@ const S = {
   combo:0, comboTimer:0,
   _totalMisses:0, _zenPuddle:0, _fastPuddle:0, _autoPuddle:0,
   _brokeCombo100:0, _brokeCombo500:0, _brokeCombo10k:0,
-  _puddleStartTime:0, _manualDropThisPuddle:false,
-  _puddleStartTime:0, _puddleManualDrops:0, _puddleAutoOnly:false,
   shake:0, autoTimer:0,
   mouseX:0, mouseHeld:false,
   hoseBend:0, hoseBendVel:0,
@@ -585,15 +583,12 @@ const S = {
   drops:[], particles:[], splashes:[], floaters:[],
   plug:null, dropPressure:0,
   _shopTimer:0, _saveTimer:0, _milTimer:0,
-  // Secret achievement trackers
-  _totalMisses:0,       // drops that missed the puddle
-  _zenPuddle:0,         // puddles filled without touching mouse
-  _fastPuddle:0,        // puddles filled in <30s
-  _autoPuddle:0,        // puddles drained using only auto-drip
-  _brokeCombo100:0,     // times a ×100+ combo was broken by a miss
-  _puddleStartTime:0,   // timestamp when current puddle fill started
-  _puddleTouchedByMouse:false, // did mouse drip into this puddle?
-  _puddleAutoOnly:true, // was this puddle filled by auto only?
+  // Secret achievement trackers (per fill cycle; see beginPuddleFillCycle)
+  _puddleStartTime:0,
+  _manualDripSpawned:false, // any manual wiggle/cap drop this cycle (Zen)
+  _puddleAutoOnly:true,     // no manual liquid added to puddle this cycle (Patience)
+  _puddleFillEvaluated:false,
+  _puddleAutoOnlyAtFull:false,
   puddle:{x:0,y:0,radius:25,maxRadius:200,
     noise:Array.from({length:24},()=>rnd(-4,4)),
     noiseT:Array.from({length:24},()=>rnd(-4,4))},
@@ -790,11 +785,39 @@ function floatTxt(x,y,txt,col){
   S.floaters.push({x, y, txt, col, life:1, vy:-1.2});
 }
 
+function noteManualDropSpawned(){
+  S._manualDripSpawned=true;
+}
+function noteManualPuddleFill(){
+  S._manualDripSpawned=true;
+  S._puddleAutoOnly=false;
+}
+function beginPuddleFillCycle(){
+  S._puddleStartTime=Date.now();
+  S._manualDripSpawned=false;
+  S._puddleAutoOnly=true;
+  S._puddleFillEvaluated=false;
+}
+/** When puddle first hits full this cycle: Speed Drip, Zen, Patience snapshot */
+function createPlugIfNeeded(){
+  if(S.puddle.radius<S.puddle.maxRadius||S.plug)return;
+  if(S._puddleFillEvaluated)return;
+  S._puddleFillEvaluated=true;
+  S.plug={x:S.puddle.x,y:S.puddle.y-32,bob:0,draining:false,prog:0};
+  const t0=S._puddleStartTime;
+  const elapsed=t0>0?(Date.now()-t0)/1000:999;
+  if(elapsed<30)S._fastPuddle++;
+  if(!S._manualDripSpawned)S._zenPuddle++;
+  S._puddleAutoOnlyAtFull=!!S._puddleAutoOnly;
+  checkMilestones();
+}
+
 // ════════════════════════════════════════════════════════
 // DROP PHYSICS
 // ════════════════════════════════════════════════════════
 function creditDrop(){
-  // Counts as a puddle hit for income/fill — no visual drop spawned
+  // Counts as a puddle hit for income/fill — no visual drop spawned (manual wiggle path only)
+  noteManualPuddleFill();
   const l=liq();
   const val=dropValue();
   const cm=comboMult();
@@ -804,8 +827,7 @@ function creditDrop(){
   S.lifeDrip+=earned;
   const grow=fillAmt(dropRadius(),l.spread)*1.3;
   S.puddle.radius=Math.min(S.puddle.maxRadius,S.puddle.radius+grow);
-  if(S.puddle.radius>=S.puddle.maxRadius&&!S.plug)
-    S.plug={x:S.puddle.x,y:S.puddle.y-32,bob:0,draining:false,prog:0};
+  createPlugIfNeeded();
   S.combo++;
   S.comboTimer=comboWindow();
   if(S.combo>S.maxCombo)S.maxCombo=S.combo;
@@ -822,7 +844,7 @@ function spawnDrop(fromAuto=false){
     S.drops.push({x:S.nozzleX+rnd(-10,10),y:S.nozzleY,
       vx:vx+rnd(-2,2),vy,r:r*.75,liqId:S.currentLiquid,trail:[],bounces:0,fromAuto});
   }
-  if(!fromAuto)S._puddleTouchedByMouse=true;
+  if(!fromAuto)noteManualDropSpawned();
 }
 
 function dropLanded(d){
@@ -840,6 +862,7 @@ function dropLanded(d){
   const onPuddle=dst(d.x,d.y,S.puddle.x,S.puddle.y)<S.puddle.radius*1.5;
   const grow=fillAmt(d.r,l.spread)*(onPuddle?1.3:.42);
   S.puddle.radius=Math.min(S.puddle.maxRadius,S.puddle.radius+grow);
+  if(onPuddle&&!d.fromAuto)noteManualPuddleFill();
 
   // Combo only builds on puddle hits — misses reset it
   if(onPuddle){
@@ -864,9 +887,7 @@ function dropLanded(d){
     if(bonus>0)floatTxt(d.x,d.y-30,`overflow +${fmt(bonus)}`,'#ff6600');
   }
 
-  if(S.puddle.radius>=S.puddle.maxRadius&&!S.plug){
-    S.plug={x:S.puddle.x,y:S.puddle.y-32,bob:0,draining:false,prog:0};
-  }
+  createPlugIfNeeded();
 
   for(let i=0;i<S.puddle.noise.length;i++){
     S.puddle.noiseT[i]+=rnd(-5,5);
@@ -926,7 +947,7 @@ function update(ts){
   // Auto-drip
   if(upg('auto')>0){
     S.autoTimer+=dt;
-    if(S.autoTimer>=autoInterval()){S.autoTimer=0;spawnDrop();}
+    if(S.autoTimer>=autoInterval()){S.autoTimer=0;spawnDrop(true);}
   }
 
   // Combo decay
@@ -954,6 +975,7 @@ function update(ts){
       S.plug.prog+=dt*drainSpd;
       S.puddle.radius=S.puddle.maxRadius*(1-S.plug.prog);
       if(S.plug.prog>=1){
+        if(S._puddleAutoOnlyAtFull)S._autoPuddle++;
         S.puddlesDone++;
         const base=Math.round(250*Math.pow(1.55,S.puddleLevel-1));
         const reward=Math.round(base*drainBonus());
@@ -964,6 +986,7 @@ function update(ts){
         S.puddleLevel++;
         S.puddle.maxRadius=clamp(200+S.puddleLevel*6,200,350);
         S.puddle.radius=25;S.plug=null;
+        beginPuddleFillCycle();
         updateHUD();buildShop();checkMilestones();
       }
     }
@@ -1540,6 +1563,7 @@ function doPrestige(){
   Object.keys(S.liquids).forEach(k => S.liquids[k] = k==='water');
   HOSES.forEach(h => S.hoses[h.id] = h.id==='garden');
   UPGRADES.forEach(u => S.upgrades[u.id] = 0);
+  beginPuddleFillCycle();
   updateHUD(); buildShop(); checkMilestones();
   floatTxt(canvas.width/2, canvas.height/2 - 40, `⚡ PRESTIGE ${S.prestigeCount}!`, '#ff8800');
   saveGame();
@@ -1690,6 +1714,7 @@ window.addEventListener('touchend',()=>{S.mouseHeld=false;});
 // INIT & LOOP
 // ════════════════════════════════════════════════════════
 loadGame();
+beginPuddleFillCycle();
 S.hoseBaseX=canvas.width/2;
 S.hoseBaseY=-10;
 S.nozzleX=canvas.width/2;
