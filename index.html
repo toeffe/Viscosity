@@ -216,6 +216,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .upg:hover:not([disabled]){background:var(--upg-hover-bg);border-color:var(--border2);transform:translateY(-1px);}
 .upg:active:not([disabled]){transform:translateY(0);}
 .upg[disabled]{opacity:.28;cursor:not-allowed;}
+.upg.locked{opacity:.55;cursor:not-allowed;}
 .upg.can{border-color:var(--upg-can-border);background:var(--upg-can-bg);}
 .upg.can:hover{border-color:var(--upg-can-border-hover);background:var(--upg-can-hover-bg);}
 .upg.maxed{border-color:var(--upg-maxed-border);opacity:.45;cursor:not-allowed;}
@@ -259,6 +260,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .tile:hover{border-color:var(--border2);background:var(--tile-hover-bg);}
 .tile.active{border-color:var(--tile-active-border);background:var(--tile-active-bg);color:var(--tile-active-border);}
 .tile.locked{opacity:.32;}
+.tile.pre-lock{opacity:.5;cursor:default;}
 .tile-left{display:flex;align-items:center;gap:9px;}
 .tile-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .tile-name{font-size:12px;font-weight:700;}
@@ -770,25 +772,28 @@ function buildLeaderboardTab(){
 // ════════════════════════════════════════════════════════
 const LIQUIDS = {
   water:      {name:'Water',        emoji:'💧',color:'#29b6f6',puddle:'#1565c0',pLight:'#1e88e530',gravity:.38,spread:1.0, mult:1,    sz:1.0, bounce:.0,  cost:0,         revealAt:0,        desc:'Baseline · reliable'},
-  oil:        {name:'Oil',          emoji:'🫙',color:'#ffb300',puddle:'#5d4037',pLight:'#78460430',gravity:.16,spread:1.9, mult:1.8,  sz:1.3, bounce:.25, cost:800,       revealAt:0,        desc:'×1.8 · spreads wide'},
-  neon:       {name:'Neon Goo',     emoji:'🟢',color:'#00e676',puddle:'#1b5e20',pLight:'#00e67630',gravity:.42,spread:1.1, mult:2.5,  sz:.85, bounce:.45, cost:5000,      revealAt:500,      desc:'×2.5 · bouncy'},
-  lava:       {name:'Lava',         emoji:'🌋',color:'#ff5722',puddle:'#b71c1c',pLight:'#ff572230',gravity:.60,spread:.65, mult:4,    sz:1.9, bounce:.0,  cost:20000,     revealAt:3000,     desc:'×4 · massive drops'},
-  slime:      {name:'Slime',        emoji:'🟡',color:'#aeea00',puddle:'#33691e',pLight:'#aeea0030',gravity:.22,spread:.80, mult:6,    sz:1.5, bounce:.60, cost:75000,     revealAt:14000,    desc:'×6 · super bouncy'},
-  honey:      {name:'Amber Honey',  emoji:'🍯',color:'#ffab40',puddle:'#e65100',pLight:'#ffab4030',gravity:.20,spread:1.25, mult:7.5,  sz:1.15,bounce:.12, cost:165000,    revealAt:38000,    desc:'×7.5 · slow & sticky'},
-  mercury:    {name:'Mercury',      emoji:'⚗️',color:'#b0bec5',puddle:'#546e7a',pLight:'#b0bec530',gravity:.90,spread:.50, mult:10,   sz:2.2, bounce:.0,  cost:295000,    revealAt:52000,    desc:'×10 · ultra heavy'},
-  quantum:    {name:'Quantum Goo',  emoji:'🌀',color:'#e040fb',puddle:'#4a148c',pLight:'#e040fb30',gravity:.30,spread:2.5, mult:20,   sz:1.0, bounce:.80, cost:1100000,   revealAt:220000,   desc:'×20 · teleports'},
-  void:       {name:'Void Essence', emoji:'🖤',color:'#78909c',puddle:'#1a1a2e',pLight:'#78909c30',gravity:.05,spread:3.5, mult:45,   sz:.70, bounce:.90, cost:5500000,   revealAt:1400000,  desc:'×45 · defies gravity'},
-  crystal:    {name:'Crystal Nectar',emoji:'💠',color:'#69f0ae',puddle:'#004d40',pLight:'#69f0ae30',gravity:.52,spread:.72, mult:32,   sz:1.35,bounce:.18, cost:4200000,   revealAt:950000,   desc:'×32 · dense facets'},
-  starplasm:  {name:'Star Plasm',   emoji:'⭐',color:'#fff176',puddle:'#f57f17',pLight:'#fff17630',gravity:.45,spread:1.8, mult:100,  sz:1.2, bounce:.50, cost:22000000,  revealAt:7200000,  desc:'×100 · stellar'},
-  chronofluid:{name:'Chrono Fluid', emoji:'⏳',color:'#80cbc4',puddle:'#004d40',pLight:'#80cbc430',gravity:.70,spread:.40, mult:250,  sz:2.8, bounce:.0,  cost:9e7,       revealAt:3.5e7,    desc:'×250 · bends time'},
-  godwater:   {name:'God Water',    emoji:'🌊',color:'#e3f2fd',puddle:'#90caf9',pLight:'#e3f2fd30',gravity:.50,spread:2.0, mult:1000, sz:1.5, bounce:.70, cost:4e8,       revealAt:1.6e8,    desc:'×1000 · divine'},
-  abyss:      {name:'Abyss',        emoji:'🌑',color:'#4a148c',puddle:'#0d0018',pLight:'#4a148c30',gravity:-.1,spread:4.0, mult:5000, sz:.60, bounce:1.0, cost:4e9,       revealAt:1.6e9,    desc:'×5000 · falls UP'},
-  cosmicmilk: {name:'Cosmic Milk',  emoji:'🌌',color:'#f8f8ff',puddle:'#7986cb',pLight:'#f8f8ff30',gravity:.55,spread:2.2, mult:25000,sz:1.8, bounce:.40, cost:4e10,      revealAt:1.6e10,   desc:'×25K · galactic'},
-  infinidrop: {name:'Infinidrop',   emoji:'♾️',color:'#ffd700',puddle:'#ff8f00',pLight:'#ffd70030',gravity:.50,spread:1.5, mult:1e6,  sz:1.0, bounce:.50, cost:8e12,      revealAt:4e12,     desc:'×1M · the end game liquid'},
-  primordial: {name:'Primordial Soup',emoji:'🧬',color:'#00bcd4',puddle:'#006064',pLight:'#00bcd430',gravity:.46,spread:1.7, mult:4e6, sz:1.05,bounce:.42, cost:6e14,      revealAt:2.5e14,   desc:'×4M · life before time'},
-  aeonjuice:  {name:'Aeon Juice',     emoji:'⏳',color:'#7e57c2',puddle:'#311b92',pLight:'#7e57c230',gravity:.44,spread:1.55,mult:2e8, sz:1.08,bounce:.38, cost:5e15,      revealAt:2e15,     desc:'×200M · deep time'},
-  solblood:   {name:'Solar Blood',    emoji:'☀️',color:'#ff6f00',puddle:'#bf360c',pLight:'#ff6f0030',gravity:.62,spread:.88, mult:5e10,sz:1.45,bounce:.08, cost:3e17,      revealAt:1.2e17,   desc:'×50B · stellar core'},
-  omegabath:  {name:'Omega Bath',     emoji:'🔯',color:'#eceff1',puddle:'#263238',pLight:'#eceff130',gravity:.48,spread:1.4, mult:2e12, sz:1.0, bounce:.55, cost:8e19,      revealAt:3e19,     desc:'×2T · terminal solvent'},
+  oil:        {name:'Oil',          emoji:'🫙',color:'#ffb300',puddle:'#5d4037',pLight:'#78460430',gravity:.16,spread:1.9, mult:1.8,  sz:1.3, bounce:.25, cost:1200,      revealAt:0,        desc:'×1.8 · spreads wide'},
+  neon:       {name:'Neon Goo',     emoji:'🟢',color:'#00e676',puddle:'#1b5e20',pLight:'#00e67630',gravity:.42,spread:1.1, mult:2.5,  sz:.85, bounce:.45, cost:8500,      revealAt:850,      desc:'×2.5 · bouncy'},
+  lava:       {name:'Lava',         emoji:'🌋',color:'#ff5722',puddle:'#b71c1c',pLight:'#ff572230',gravity:.60,spread:.65, mult:4,    sz:1.9, bounce:.0,  cost:35000,     revealAt:5200,     desc:'×4 · massive drops'},
+  slime:      {name:'Slime',        emoji:'🟡',color:'#aeea00',puddle:'#33691e',pLight:'#aeea0030',gravity:.22,spread:.80, mult:6,    sz:1.5, bounce:.60, cost:130000,    revealAt:24500,    desc:'×6 · super bouncy'},
+  honey:      {name:'Amber Honey',  emoji:'🍯',color:'#ffab40',puddle:'#e65100',pLight:'#ffab4030',gravity:.20,spread:1.25, mult:7.5,  sz:1.15,bounce:.12, cost:285000,    revealAt:65000,    desc:'×7.5 · slow & sticky'},
+  mercury:    {name:'Mercury',      emoji:'⚗️',color:'#b0bec5',puddle:'#546e7a',pLight:'#b0bec530',gravity:.90,spread:.50, mult:10,   sz:2.2, bounce:.0,  cost:530000,    revealAt:95000,    desc:'×10 · ultra heavy'},
+  quantum:    {name:'Quantum Goo',  emoji:'🌀',color:'#e040fb',puddle:'#4a148c',pLight:'#e040fb30',gravity:.30,spread:2.5, mult:20,   sz:1.0, bounce:.80, cost:2200000,   revealAt:440000,   desc:'×20 · teleports'},
+  void:       {name:'Void Essence', emoji:'🖤',color:'#78909c',puddle:'#1a1a2e',pLight:'#78909c30',gravity:.05,spread:3.5, mult:45,   sz:.70, bounce:.90, cost:12000000,  revealAt:3100000,  desc:'×45 · defies gravity'},
+  crystal:    {name:'Crystal Nectar',emoji:'💠',color:'#69f0ae',puddle:'#004d40',pLight:'#69f0ae30',gravity:.52,spread:.72, mult:32,   sz:1.35,bounce:.18, cost:8800000,   revealAt:2000000,  desc:'×32 · dense facets'},
+  starplasm:  {name:'Star Plasm',   emoji:'⭐',color:'#fff176',puddle:'#f57f17',pLight:'#fff17630',gravity:.45,spread:1.8, mult:100,  sz:1.2, bounce:.50, cost:48000000,  revealAt:15500000, desc:'×100 · stellar'},
+  chronofluid:{name:'Chrono Fluid', emoji:'⏳',color:'#80cbc4',puddle:'#004d40',pLight:'#80cbc430',gravity:.70,spread:.40, mult:250,  sz:2.8, bounce:.0,  cost:2.2e8,     revealAt:8.8e7,    desc:'×250 · bends time'},
+  godwater:   {name:'God Water',    emoji:'🌊',color:'#e3f2fd',puddle:'#90caf9',pLight:'#e3f2fd30',gravity:.50,spread:2.0, mult:1000, sz:1.5, bounce:.70, cost:1.1e9,     revealAt:4.4e8,    desc:'×1000 · divine'},
+  abyss:      {name:'Abyss',        emoji:'🌑',color:'#4a148c',puddle:'#0d0018',pLight:'#4a148c30',gravity:-.1,spread:4.0, mult:5000, sz:.60, bounce:1.0, cost:1.1e10,    revealAt:4.4e9,    desc:'×5000 · falls UP'},
+  cosmicmilk: {name:'Cosmic Milk',  emoji:'🌌',color:'#f8f8ff',puddle:'#7986cb',pLight:'#f8f8ff30',gravity:.55,spread:2.2, mult:25000,sz:1.8, bounce:.40, cost:1.1e11,    revealAt:4.4e10,   desc:'×25K · galactic'},
+  infinidrop: {name:'Infinidrop',   emoji:'♾️',color:'#ffd700',puddle:'#ff8f00',pLight:'#ffd70030',gravity:.50,spread:1.5, mult:1e6,  sz:1.0, bounce:.50, cost:2.4e13,    revealAt:1.2e13,   desc:'×1M · the end game liquid'},
+  primordial: {name:'Primordial Soup',emoji:'🧬',color:'#00bcd4',puddle:'#006064',pLight:'#00bcd430',gravity:.46,spread:1.7, mult:4e6, sz:1.05,bounce:.42, cost:1.8e15,    revealAt:7.5e14,   desc:'×4M · life before time'},
+  aeonjuice:  {name:'Aeon Juice',     emoji:'⏳',color:'#7e57c2',puddle:'#311b92',pLight:'#7e57c230',gravity:.44,spread:1.55,mult:2e8, sz:1.08,bounce:.38, cost:1.6e16,    revealAt:6.5e15,   desc:'×200M · deep time'},
+  solblood:   {name:'Solar Blood',    emoji:'☀️',color:'#ff6f00',puddle:'#bf360c',pLight:'#ff6f0030',gravity:.62,spread:.88, mult:5e10,sz:1.45,bounce:.08, cost:1e18,      revealAt:4e17,     desc:'×50B · stellar core'},
+  omegabath:  {name:'Omega Bath',     emoji:'🔯',color:'#eceff1',puddle:'#263238',pLight:'#eceff130',gravity:.48,spread:1.4, mult:2e12, sz:1.0, bounce:.55, cost:2.6e20,    revealAt:1e20,     desc:'×2T · terminal solvent'},
+  rebirthnectar:{name:'Rebirth Nectar',emoji:'🌱',color:'#66bb6a',puddle:'#1b5e20',pLight:'#66bb6a35',gravity:.34,spread:1.35,mult:52, sz:1.12,bounce:.33, cost:2.5e17,    revealAt:8e16,     prestigeMin:1, desc:'×52 · prestige bloom'},
+  eclipsetears:{name:'Eclipse Tears',emoji:'🌒',color:'#5c6bc0',puddle:'#1a237e',pLight:'#5c6bc035',gravity:.41,spread:1.65,mult:2.8e13,sz:1.18,bounce:.36, cost:5e18,    revealAt:1.8e18,   prestigeMin:3, desc:'×28T · umbral flow'},
+  transcendgel:{name:'Transcendent Gel',emoji:'✴️',color:'#ffd54f',puddle:'#ff6f00',pLight:'#ffd54f40',gravity:.47,spread:1.5,mult:1.5e15,sz:1.06,bounce:.44, cost:1.5e20,  revealAt:5e19,     prestigeMin:5, desc:'×1.5Qa · beyond the ladder'},
 };
 
 // ════════════════════════════════════════════════════════
@@ -796,21 +801,24 @@ const LIQUIDS = {
 // ════════════════════════════════════════════════════════
 const HOSES = [
   {id:'garden',     name:'Garden Hose',      icon:'🪣', desc:'Standard issue',             cost:0,        flow:1.0, dmult:1.0,  col:'#404040',hi:'#707070',revealAt:0       },
-  {id:'copper',     name:'Copper Pipe',       icon:'🔩', desc:'+50% flow · +20% value',     cost:1000,     flow:1.5, dmult:1.2,  col:'#b5651d',hi:'#d4863a',revealAt:0       },
-  {id:'firehose',   name:'Fire Hose',         icon:'🚒', desc:'High volume output',          cost:6200,     flow:2.5, dmult:1.4,  col:'#c0392b',hi:'#e74c3c',revealAt:1800    },
-  {id:'steel',      name:'Steel Line',        icon:'🔧', desc:'Balanced pressure · strong value',cost:48000, flow:2.2, dmult:1.75, col:'#607d8b',hi:'#90a4ae',revealAt:26000   },
-  {id:'iv',         name:'Drip IV Tube',      icon:'💉', desc:'Slow · very high value',      cost:25000,    flow:.50, dmult:4.0,  col:'#27ae60',hi:'#2ecc71',revealAt:7500    },
-  {id:'industrial', name:'Industrial Pipe',   icon:'🏭', desc:'Massive chaos output',        cost:105000,   flow:3.5, dmult:2.0,  col:'#7f8c8d',hi:'#95a5a6',revealAt:32000   },
-  {id:'diamond',    name:'Diamond Nozzle',    icon:'💎', desc:'Precision + high value',      cost:520000,   flow:2.5, dmult:6.0,  col:'#74b9ff',hi:'#a8d8ff',revealAt:135000  },
-  {id:'titanium',   name:'Titanium Duct',     icon:'🛠️', desc:'Rugged flow · huge driplets', cost:1900000,  flow:3.8, dmult:9.0,  col:'#cfd8dc',hi:'#eceff1',revealAt:520000  },
-  {id:'quantum',    name:'Quantum Pipe',      icon:'⚛️', desc:'Drops warp through space',    cost:2700000,  flow:4.0, dmult:10.0, col:'#a29bfe',hi:'#d6cffe',revealAt:720000  },
-  {id:'singularity',name:'Singularity Valve', icon:'🕳️', desc:'Infinite-density drips',      cost:13500000, flow:6.0, dmult:20.0, col:'#4527a0',hi:'#7c4dff',revealAt:4500000 },
-  {id:'omega',      name:'Omega Conduit',     icon:'♾️', desc:'Near-max output',             cost:72000000, flow:10.0,dmult:50.0, col:'#b8860b',hi:'#ffd700',revealAt:2.2e7  },
-  {id:'godpipe',    name:'God Pipe',          icon:'✨', desc:'Transcends physics itself',   cost:4e9,      flow:25.0,dmult:200.0,col:'#e3f2fd',hi:'#ffffff',revealAt:1.6e9  },
-  {id:'ultima',     name:'Ultima Spout',      icon:'🌠', desc:'Beyond god-tier throughput',  cost:1.2e11,   flow:38.0,dmult:380.0,col:'#ffe082',hi:'#fff8e1',revealAt:5e10   },
-  {id:'apotheon',   name:'Apotheon Feed',     icon:'⚜️', desc:'Ascended flow & value',       cost:2e13,     flow:52.0,dmult:520.0,col:'#ffd54f',hi:'#fff9c4',revealAt:8e12   },
-  {id:'chronos',    name:'Chronos Main',      icon:'⌚', desc:'Time-bent throughput',        cost:8e14,     flow:68.0,dmult:750.0,col:'#b39ddb',hi:'#d1c4e9',revealAt:3e14   },
-  {id:'finality',   name:'Finality Hose',     icon:'⬛', desc:'Last plumbing in the ladder', cost:5e16,     flow:85.0,dmult:1100.0,col:'#424242',hi:'#9e9e9e',revealAt:1.5e16 },
+  {id:'copper',     name:'Copper Pipe',       icon:'🔩', desc:'+50% flow · +20% value',     cost:1500,     flow:1.5, dmult:1.2,  col:'#b5651d',hi:'#d4863a',revealAt:0       },
+  {id:'firehose',   name:'Fire Hose',         icon:'🚒', desc:'High volume output',          cost:9500,     flow:2.5, dmult:1.4,  col:'#c0392b',hi:'#e74c3c',revealAt:2700    },
+  {id:'steel',      name:'Steel Line',        icon:'🔧', desc:'Balanced pressure · strong value',cost:78000, flow:2.2, dmult:1.75, col:'#607d8b',hi:'#90a4ae',revealAt:42000   },
+  {id:'iv',         name:'Drip IV Tube',      icon:'💉', desc:'Slow · very high value',      cost:36000,    flow:.50, dmult:4.0,  col:'#27ae60',hi:'#2ecc71',revealAt:11000   },
+  {id:'industrial', name:'Industrial Pipe',   icon:'🏭', desc:'Massive chaos output',        cost:168000,   flow:3.5, dmult:2.0,  col:'#7f8c8d',hi:'#95a5a6',revealAt:52000   },
+  {id:'diamond',    name:'Diamond Nozzle',    icon:'💎', desc:'Precision + high value',      cost:820000,   flow:2.5, dmult:6.0,  col:'#74b9ff',hi:'#a8d8ff',revealAt:205000  },
+  {id:'titanium',   name:'Titanium Duct',     icon:'🛠️', desc:'Rugged flow · huge driplets', cost:3200000,  flow:3.8, dmult:9.0,  col:'#cfd8dc',hi:'#eceff1',revealAt:900000  },
+  {id:'quantum',    name:'Quantum Pipe',      icon:'⚛️', desc:'Drops warp through space',    cost:5500000,  flow:4.0, dmult:10.0, col:'#a29bfe',hi:'#d6cffe',revealAt:1450000 },
+  {id:'singularity',name:'Singularity Valve', icon:'🕳️', desc:'Infinite-density drips',      cost:32000000, flow:6.0, dmult:20.0, col:'#4527a0',hi:'#7c4dff',revealAt:10500000},
+  {id:'omega',      name:'Omega Conduit',     icon:'♾️', desc:'Near-max output',             cost:175000000,flow:10.0,dmult:50.0, col:'#b8860b',hi:'#ffd700',revealAt:52000000},
+  {id:'godpipe',    name:'God Pipe',          icon:'✨', desc:'Transcends physics itself',   cost:1e10,     flow:25.0,dmult:200.0,col:'#e3f2fd',hi:'#ffffff',revealAt:4e9     },
+  {id:'ultima',     name:'Ultima Spout',      icon:'🌠', desc:'Beyond god-tier throughput',  cost:3.2e11,   flow:38.0,dmult:380.0,col:'#ffe082',hi:'#fff8e1',revealAt:1.3e11 },
+  {id:'apotheon',   name:'Apotheon Feed',     icon:'⚜️', desc:'Ascended flow & value',       cost:5.5e13,   flow:52.0,dmult:520.0,col:'#ffd54f',hi:'#fff9c4',revealAt:2.2e13 },
+  {id:'chronos',    name:'Chronos Main',      icon:'⌚', desc:'Time-bent throughput',        cost:2.2e15,   flow:68.0,dmult:750.0,col:'#b39ddb',hi:'#d1c4e9',revealAt:8e14   },
+  {id:'finality',   name:'Finality Hose',     icon:'⬛', desc:'Last plumbing in the ladder', cost:1.35e17,  flow:85.0,dmult:1100.0,col:'#424242',hi:'#9e9e9e',revealAt:4e16   },
+  {id:'veinline',   name:'Vein Line',         icon:'🩸', desc:'Prestige-fed conduit',       cost:2e17,     flow:56.0,dmult:580.0,col:'#c62828',hi:'#ff5252',revealAt:7e16,   prestigeMin:1},
+  {id:'novastack',  name:'Nova Stack',        icon:'🌟', desc:'Stacked stellar pressure',    cost:4.5e18,   flow:74.0,dmult:920.0,col:'#ffab00',hi:'#ffe082',revealAt:1.6e18, prestigeMin:3},
+  {id:'obliviontap',name:'Oblivion Tap',      icon:'🜏', desc:'Terminal prestige outlet',    cost:1.2e20,   flow:98.0,dmult:1500.0,col:'#37474f',hi:'#78909c',revealAt:4.5e19, prestigeMin:5},
 ];
 
 // ════════════════════════════════════════════════════════
@@ -921,6 +929,17 @@ const UPGRADES = [
     costs:mkCosts(1.2e15,10.2,5)},
   {id:'stellar',    name:'Stellar Spill',  desc:'Overflow bonus driplets +%',icon:'✴️',tier:7,revealAt:1.1e15,
     costs:mkCosts(1.5e15,10.5,5)},
+  // Tier 8 — Prestige path (gated by prestigeMin; still driplet costs each run)
+  {id:'rebornflow', name:'Flow Tuning',    desc:'Manual wiggle cooldown slightly faster',icon:'🎛️',tier:8,revealAt:4e16,prestigeMin:1,
+    costs:mkCosts(2e16,4.5,8)},
+  {id:'wellspring', name:'Puddle Well',    desc:'Puddle fills slightly more per hit',icon:'🫧',tier:8,revealAt:5e16,prestigeMin:1,
+    costs:mkCosts(2.5e16,4.5,8)},
+  {id:'scoreflux',  name:'Score Bloom',    desc:'Score from driplets +4% per level',icon:'📈',tier:8,revealAt:1.2e18,prestigeMin:3,
+    costs:mkCosts(6e17,5,8)},
+  {id:'driftmind',  name:'Drift Mind',     desc:'Combo window +2.2% per level',icon:'🌊',tier:8,revealAt:1.5e18,prestigeMin:3,
+    costs:mkCosts(7e17,5,8)},
+  {id:'aetherstride',name:'Aether Stride', desc:'Auto-drip fires faster',icon:'💫',tier:8,revealAt:5e19,prestigeMin:5,
+    costs:mkCosts(2.5e19,5.5,8)},
 ];
 UPGRADES.forEach(u=>{u.max=u.costs.length;});
 
@@ -1036,6 +1055,11 @@ const ACHIEVEMENTS = [
   {id:'aeon_liq',      name:'Deep Time Sipper',     desc:'Unlock Aeon Juice',                        check:s=>s.liquids.aeonjuice},
   {id:'solblood_liq',  name:'Core Sample',          desc:'Unlock Solar Blood',                       check:s=>s.liquids.solblood},
   {id:'omega_liq',     name:'Terminal Bath',        desc:'Unlock Omega Bath',                        check:s=>s.liquids.omegabath},
+  {id:'prestige_liquid1',name:'Reborn Mixologist', desc:'Unlock Rebirth Nectar (prestige liquid)',  check:s=>s.liquids.rebirthnectar},
+  {id:'prestige_pipe1',  name:'Vein Runner',        desc:'Unlock the Vein Line (prestige pipe)',     check:s=>s.hoses.veinline},
+  {id:'prestige_path_upg',name:'Prestige Path',    desc:'Buy Flow Tuning or Puddle Well once',      check:s=>(s.upgrades.rebornflow|0)>=1||(s.upgrades.wellspring|0)>=1},
+  {id:'prestige_deep3',  name:'Triune Return',      desc:'Unlock Eclipse Tears or Nova Stack',       check:s=>s.liquids.eclipsetears||s.hoses.novastack},
+  {id:'prestige_crown5', name:'Fifth Gate',         desc:'Unlock Transcendent Gel or Oblivion Tap',  check:s=>s.liquids.transcendgel||s.hoses.obliviontap},
 
   // ── Upgrades ──────────────────────────────────────────────────────────────
   {id:'first_upg',   name:'First Upgrade',          desc:'Buy any upgrade',                          check:s=>Object.values(s.upgrades).some(v=>v>0)},
@@ -1293,7 +1317,8 @@ function upg(id){return S.upgrades[id]||0;}
 function genesisBonus(){return Math.pow(1.05,upg('genesis'));}
 function flowInterval(){
   const base=1650,red=upg('flow')*108,pres=upg('pressure')*.048,tw=upg('timewarp')*.14;
-  return Math.max(58,(base-red)/(hose().flow*(1+pres+tw)));
+  const rf=1+upg('rebornflow')*.038;
+  return Math.max(58,(base-red)/(hose().flow*(1+pres+tw)*rf));
 }
 function dropRadius(){
   // Hard cap so drops don't dominate screen — max 22px visual radius
@@ -1304,6 +1329,7 @@ function prestigeBonus(){return Math.pow(1.5,S.prestigeCount||0);}
 function cyclonMult(){
   return 1+upg('cyclon')*.0065*Math.min(30,S.prestigeCount||0);
 }
+function scorefluxMult(){return 1+upg('scoreflux')*.04;}
 function dropValue(){
   const h=hose(),l=liq();
   const vm=1+upg('value')*.37,szm=1+upg('size')*.118,spm=1+upg('splash')*.098;
@@ -1352,9 +1378,10 @@ function autoInterval(){
   let iv=Math.max(floor,base);
   if(S.overdriveOn)iv*=0.74;
   if(S.conservationOn)iv*=1.17;
+  iv/=1+upg('aetherstride')*.055;
   return iv;
 }
-function comboWindow(){return (50+upg('combo')*28)*essenceComboWin();}
+function comboWindow(){return (50+upg('combo')*28)*essenceComboWin()*(1+upg('driftmind')*.022);}
 function comboMult(){
   if(S.combo<2)return 1;
   const cap=upg('singmind')>0?99999:5;
@@ -1384,10 +1411,17 @@ function fillAmt(r,spread){
   const penExp=Math.min(Math.max(0,S.puddleLevel-1),capTier);
   const pen=Math.pow(1.28,penExp)/tc;
   const sticky=1+upg('stickiness')*.034;
-  return(r*r*.0032*spread*sticky)/pen;
+  const well=1+upg('wellspring')*.028;
+  return(r*r*.0032*spread*sticky*well)/pen;
 }
 function multiChance(){return Math.min(upg('multidrip')*.07,.85);}
 function visible(revealAt){return(S.totalSpent||0)>=revealAt;}
+function shopVisible(row){
+  return visible(row.revealAt) && (S.prestigeCount||0) >= (row.prestigeMin|0);
+}
+function prestigeLocked(row){
+  return visible(row.revealAt) && (S.prestigeCount||0) < (row.prestigeMin|0);
+}
 
 // ════════════════════════════════════════════════════════
 // PARTICLES & FLOATERS — all canvas-rendered, hard capped
@@ -1463,7 +1497,7 @@ function creditDrop(){
   const cm=comboMult();
   let earned=Math.max(1,Math.round(val*cm));
   earned=Math.max(1,Math.round(earned*manualDripMult()));
-  S.score+=earned*10;
+  S.score+=Math.round(earned*10*scorefluxMult());
   S.driplets+=earned;
   S.lifeDrip+=earned;
   const grow=fillAmt(dropRadius(),l.spread)*1.3;
@@ -1498,7 +1532,7 @@ function dropLanded(d){
   const onPuddle=dst(d.x,d.y,S.puddle.x,S.puddle.y)<S.puddle.radius*1.5;
   if(onPuddle&&!d.fromAuto)earned=Math.max(1,Math.round(earned*manualDripMult()));
 
-  S.score+=earned*10;
+  S.score+=Math.round(earned*10*scorefluxMult());
   S.driplets+=earned;
   S.lifeDrip+=earned;
   const sk=1.2*(1+FX.lateGame*.42);
@@ -1785,7 +1819,8 @@ function updateFX(dt){
   const hueMap = {
     water:220, oil:35, neon:145, lava:15, slime:80,
     mercury:200, quantum:290, void:260, starplasm:55,
-    chronofluid:175, godwater:210, abyss:275, cosmicmilk:230, infinidrop:45
+    chronofluid:175, godwater:210, abyss:275, cosmicmilk:230, infinidrop:45,
+    rebirthnectar:125, eclipsetears:235, transcendgel:38
   };
   FX.bgHueTarget = hueMap[S.currentLiquid] || 220;
   FX.bgHue = lerp(FX.bgHue, FX.bgHueTarget, .015);
@@ -2277,13 +2312,24 @@ function buildUpgradesTab(){
     box.appendChild(pbtn);el.appendChild(box);
   }
 
-  const tiers={1:'Tier 1 — Core',2:'Tier 2 — Mid',3:'Tier 3 — Late',4:'Tier 4 — End Game',5:'Tier 5 — Beyond',6:'Tier 6 — ∞ Infinite',7:'Tier 7 — Transcendent'};
+  const tiers={1:'Tier 1 — Core',2:'Tier 2 — Mid',3:'Tier 3 — Late',4:'Tier 4 — End Game',5:'Tier 5 — Beyond',6:'Tier 6 — ∞ Infinite',7:'Tier 7 — Transcendent',8:'Tier 8 — Prestige path'};
   let lastTier=0;
   for(const def of UPGRADES){
     if(!visible(def.revealAt))continue;
     if(def.tier!==lastTier){
       const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent=tiers[def.tier]||'Beyond';el.appendChild(lbl);
       lastTier=def.tier;
+    }
+    if(prestigeLocked(def)){
+      const lock=document.createElement('button');
+      lock.type='button';
+      lock.className='upg locked';
+      lock.disabled=true;
+      lock.innerHTML=`<div class="upg-top"><span class="upg-name">${def.icon} ${def.name}</span><span class="upg-lvl" style="color:var(--muted)">🔒</span></div>
+        <div class="upg-desc">${def.desc}</div>
+        <div class="upg-cost" style="color:var(--muted)">Requires prestige ${def.prestigeMin|0}</div>`;
+      el.appendChild(lock);
+      continue;
     }
     const lvl=upg(def.id);
     const cost=upgCost(def,lvl);
@@ -2376,15 +2422,25 @@ function buildPipesTab(){
   const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Pipes & Hoses';el.appendChild(lbl);
   for(const h of HOSES){
     if(!visible(h.revealAt))continue;
+    const needP=h.prestigeMin|0;
+    const hasP=(S.prestigeCount||0)>=needP;
     const unl=S.hoses[h.id],active=S.currentHose===h.id;
     const btn=document.createElement('button');
-    btn.className='tile'+(active?' active':'')+(!unl?' locked':'');
+    btn.className='tile'+(active?' active':'')+(!unl?' locked':'')+(!hasP?' pre-lock':'');
     btn.style.borderColor=active?h.hi+'99':'';
+    if(!hasP){
+      btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${h.col}"></div>
+        <div><div class="tile-name">${h.icon} ${h.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${h.desc}</div></div></div>
+        <div class="tile-right"><span style="color:var(--muted)">🔒 Prestige ${needP}</span><br><span class="sub">Spend gate met</span></div>`;
+      btn.addEventListener('click',()=>{});
+      el.appendChild(btn);
+      continue;
+    }
     btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${h.col}"></div>
       <div><div class="tile-name">${h.icon} ${h.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${h.desc}</div></div></div>
       <div class="tile-right">${unl?`×${h.flow} flow`:'💧 '+fmt(h.cost)}<br><span class="sub">${unl?'✓ owned':S.driplets>=h.cost?'tap to buy':'locked'}</span></div>`;
     btn.addEventListener('click',()=>{
-      if(!unl){if(S.driplets>=h.cost){S.driplets-=h.cost;S.totalSpent+=h.cost;S.hoses[h.id]=true;S.currentHose=h.id;updateHUD();buildShop();checkMilestones();}}
+      if(!unl){if(S.driplets>=h.cost&&shopVisible(h)){S.driplets-=h.cost;S.totalSpent+=h.cost;S.hoses[h.id]=true;S.currentHose=h.id;updateHUD();buildShop();checkMilestones();}}
       else{S.currentHose=h.id;buildShop();}
     });
     el.appendChild(btn);
@@ -2396,14 +2452,24 @@ function buildLiquidsTab(){
   const lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Liquids';el.appendChild(lbl);
   for(const [id,l] of Object.entries(LIQUIDS)){
     if(!visible(l.revealAt))continue;
+    const needP=l.prestigeMin|0;
+    const hasP=(S.prestigeCount||0)>=needP;
     const unl=S.liquids[id],active=S.currentLiquid===id;
     const btn=document.createElement('button');
-    btn.className='tile'+(active?' active':'')+(!unl?' locked':'');
+    btn.className='tile'+(active?' active':'')+(!unl?' locked':'')+(!hasP?' pre-lock':'');
+    if(!hasP){
+      btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${l.color}"></div>
+        <div><div class="tile-name">${l.emoji} ${l.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${l.desc}</div></div></div>
+        <div class="tile-right"><span style="color:var(--muted)">🔒 Prestige ${needP}</span><br><span class="sub">Spend gate met</span></div>`;
+      btn.addEventListener('click',()=>{});
+      el.appendChild(btn);
+      continue;
+    }
     btn.innerHTML=`<div class="tile-left"><div class="tile-dot" style="background:${l.color}"></div>
       <div><div class="tile-name">${l.emoji} ${l.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${l.desc}</div></div></div>
       <div class="tile-right">${unl?'active':'💧 '+fmt(l.cost)}<br><span class="sub">${unl?'✓ owned':S.driplets>=l.cost?'tap to buy':'locked'}</span></div>`;
     btn.addEventListener('click',()=>{
-      if(!unl){if(S.driplets>=l.cost){S.driplets-=l.cost;S.totalSpent+=l.cost;S.liquids[id]=true;S.currentLiquid=id;updateHUD();buildShop();checkMilestones();}}
+      if(!unl){if(S.driplets>=l.cost&&shopVisible(l)){S.driplets-=l.cost;S.totalSpent+=l.cost;S.liquids[id]=true;S.currentLiquid=id;updateHUD();buildShop();checkMilestones();}}
       else{S.currentLiquid=id;buildShop();}
     });
     el.appendChild(btn);
