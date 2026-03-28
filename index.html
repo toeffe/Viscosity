@@ -72,9 +72,9 @@ canvas{position:absolute;top:0;left:0;display:block;}
 #panel-sub{font-size:11px;color:var(--muted);margin:2px 0 10px;letter-spacing:0.5px;line-height:1.45;}
 
 /* Tabs */
-#tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
+#tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--border);}
 .tab{
-  flex:1;height:52px;background:none;border:none;
+  flex:1;min-width:0;height:52px;background:none;border:none;
   font-family:'Space Mono',monospace;
   color:var(--muted);cursor:pointer;
   border-bottom:2px solid transparent;
@@ -214,6 +214,38 @@ canvas{position:absolute;top:0;left:0;display:block;}
 .ach-prog{font-size:10px;color:var(--muted);margin-top:3px;}
 .ach-count{font-size:11px;color:var(--text);margin-bottom:6px;}
 
+/* Leaderboard */
+.lb-hint{font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:8px;}
+.lb-field{
+  width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);
+  margin-bottom:6px;
+}
+.lb-field:focus{outline:none;border-color:var(--accent);}
+.lb-actions{display:flex;gap:6px;margin-bottom:10px;}
+.lb-btn{
+  flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:8px;
+  padding:8px 10px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);
+  cursor:pointer;transition:border-color .15s,background .15s;
+}
+.lb-btn:hover{background:#18182e;border-color:var(--accent);}
+.lb-btn:disabled{opacity:.35;cursor:not-allowed;}
+.lb-msg{font-size:10px;color:var(--muted);min-height:16px;margin-bottom:6px;}
+.lb-msg.err{color:var(--red);}
+.lb-head,.lb-row{
+  display:grid;grid-template-columns:28px 1fr minmax(0,72px) minmax(0,56px) minmax(0,44px);
+  gap:6px;align-items:center;font-size:10px;padding:5px 4px;border-radius:6px;
+}
+.lb-head{color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:4px;}
+.lb-row{background:var(--surf2);border:1px solid var(--border);margin-bottom:3px;}
+.lb-row.you{border-color:var(--accent);background:#001c22;}
+.lb-rank{text-align:center;color:var(--gold);font-weight:700;}
+.lb-pname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+.lb-num{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
+.lb-num.score{color:var(--accent);}
+.lb-num.lvl{color:var(--green);}
+.lb-num.prest{color:var(--prestige);}
+
 /* ── FLOATERS ──────────────────────────────────────────────── */
 #floaters{position:absolute;inset:0;pointer-events:none;z-index:25;overflow:hidden;}
 .floater{
@@ -280,6 +312,7 @@ canvas{position:absolute;top:0;left:0;display:block;}
       <button class="tab" onclick="switchTab('pipes',this)"><span class="tab-icon">🔧</span><span class="tab-label">Pipes</span></button>
       <button class="tab" onclick="switchTab('liquids',this)"><span class="tab-icon">💧</span><span class="tab-label">Liquids</span></button>
       <button class="tab" onclick="switchTab('ach',this)"><span class="tab-icon">🏆</span><span class="tab-label">Achs</span></button>
+      <button class="tab" onclick="switchTab('board',this)"><span class="tab-icon">📊</span><span class="tab-label">Board</span></button>
     </div>
   </div>
   <div id="panel-body">
@@ -287,9 +320,13 @@ canvas{position:absolute;top:0;left:0;display:block;}
     <div id="tab-pipes" style="display:none"></div>
     <div id="tab-liquids" style="display:none"></div>
     <div id="tab-ach" style="display:none"></div>
+    <div id="tab-board" style="display:none"></div>
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
 // HELPERS
@@ -316,6 +353,318 @@ function fmt(n) {
     return scaled.toFixed(tier > 6 ? 0 : 2) + SUFFIXES[tier];
   }
   return n.toExponential(2);
+}
+
+// ════════════════════════════════════════════════════════
+// FIREBASE — Spark (free): Firestore + Anonymous auth
+// Console: Project → Build → Firestore (create DB) → Authentication → Sign-in → Anonymous ON
+// Deploy rules from firestore.rules. (Composite index optional — only if you switch back to server-side orderBy.)
+// ════════════════════════════════════════════════════════
+// Firebase Web API keys are meant to ship in the browser — they are not secret. Real protection is
+// Firestore rules + Auth (+ optional App Check). You may restrict this key: Google Cloud Console →
+// APIs & Services → Credentials → your key → Application restrictions (HTTP referrers: your site).
+const FIREBASE_CONFIG = {
+  apiKey:'AIzaSyAMmKapmB_JO0DyQzdSK0nj687Z7pjYRlQ',
+  authDomain:'viscosityleaderboard.firebaseapp.com',
+  projectId:'viscosityleaderboard',
+  storageBucket:'viscosityleaderboard.firebasestorage.app',
+  messagingSenderId:'689156909156',
+  appId:'1:689156909156:web:4854ecc27625b3ab661771',
+};
+function firebaseReady(){
+  return typeof firebase !== 'undefined'
+    && FIREBASE_CONFIG.apiKey
+    && FIREBASE_CONFIG.projectId;
+}
+/** Maps FirebaseAuthError codes to fix steps (e.g. auth/configuration-not-found). */
+function lbAuthErrMsg(e){
+  const c=e&&e.code;
+  if(c==='auth/configuration-not-found'){
+    return 'Firebase Authentication is not set up for this project. In Firebase Console: Build → Authentication → open the page (Get started if shown). Then Sign-in method → Anonymous → Enable → Save. Hard-refresh this page. If it persists: Google Cloud Console → APIs → enable “Identity Toolkit API” for the same project.';
+  }
+  return (e&&e.message)||'Sign-in failed.';
+}
+let lbDb=null, lbAuthUid=null, lbRefreshing=false;
+const LB_SUBMIT_COOLDOWN_MS=30000;
+let lbSubmitCooldownUntil=0;
+let lbSubmitCooldownTimer=null;
+
+function lbClearSubmitCooldownTimer(){
+  clearTimeout(lbSubmitCooldownTimer);
+  lbSubmitCooldownTimer=null;
+}
+
+function lbSubmitCooldownRemainingMs(){
+  return Math.max(0,lbSubmitCooldownUntil-Date.now());
+}
+
+function lbStartSubmitCooldownUI(btnEl){
+  if(!btnEl)return;
+  lbClearSubmitCooldownTimer();
+  const orig=btnEl.dataset.lbOrigText||(btnEl.dataset.lbOrigText=btnEl.textContent);
+  btnEl.disabled=true;
+  function tick(){
+    const sec=Math.ceil(lbSubmitCooldownRemainingMs()/1000);
+    if(sec>0){
+      btnEl.textContent=`Wait ${sec}s`;
+      lbSubmitCooldownTimer=setTimeout(tick,1000);
+    }else{
+      btnEl.disabled=false;
+      btnEl.textContent=orig;
+      lbSubmitCooldownUntil=0;
+    }
+  }
+  tick();
+}
+
+function lbArmSubmitCooldown(btnEl){
+  lbSubmitCooldownUntil=Date.now()+LB_SUBMIT_COOLDOWN_MS;
+  lbStartSubmitCooldownUI(btnEl);
+}
+
+function lbSyncSubmitButtonIfCoolingDown(btnEl){
+  if(lbSubmitCooldownRemainingMs()>0)lbStartSubmitCooldownUI(btnEl);
+}
+
+function lbApplyYouHighlight(listEl){
+  if(!listEl)return;
+  let u=null;
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length)
+      u=firebase.auth().currentUser;
+  }catch(_){}
+  lbAuthUid=u&&u.uid;
+  listEl.querySelectorAll('.lb-row[data-doc-id]').forEach(row=>{
+    row.classList.toggle('you',!!lbAuthUid&&row.getAttribute('data-doc-id')===lbAuthUid);
+  });
+}
+
+function lbInitApp(){
+  if(!firebaseReady()||lbDb)return lbDb;
+  if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+  lbDb=firebase.firestore();
+  return lbDb;
+}
+
+async function lbEnsureUser(){
+  if(!firebaseReady())return null;
+  lbInitApp();
+  const auth=firebase.auth();
+  if(!auth.currentUser)await auth.signInAnonymously();
+  lbAuthUid=auth.currentUser&&auth.currentUser.uid;
+  return auth.currentUser;
+}
+
+async function lbSubmit(nameInputEl, msgEl, listEl, btnEl){
+  const msg=(t,err)=>{if(msgEl){msgEl.textContent=t;msgEl.className='lb-msg'+(err?' err':'');}};
+  msg('');
+  const name=sanitizePlayerName(nameInputEl&&nameInputEl.value||'');
+  if(!name){msg('Enter a name (letters & numbers).',true);return;}
+  if(!btnEl)return;
+  if(lbSubmitCooldownRemainingMs()>0){
+    msg(`Please wait ${Math.ceil(lbSubmitCooldownRemainingMs()/1000)}s before submitting again.`,true);
+    return;
+  }
+  btnEl.disabled=true;
+  let ok=false;
+  try{
+    const user=await lbEnsureUser();
+    if(!user)throw new Error('Auth failed — enable Anonymous sign-in in Firebase Console.');
+    await lbDb.collection('leaderboard').doc(user.uid).set({
+      name,
+      score:+S.score||0,
+      puddleLevel:+S.puddleLevel||1,
+      prestige:+S.prestigeCount||0,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    },{merge:true});
+    playerName=name;
+    if(nameInputEl)nameInputEl.value=name;
+    saveGame();
+    msg('Submitted. Good drip.');
+    await lbLoadRows(listEl,msgEl);
+    try{await lbEnsureUser();}catch(_){}
+    lbApplyYouHighlight(listEl);
+    ok=true;
+  }catch(e){
+    console.warn(e);
+    msg(lbAuthErrMsg(e)||'Submit failed. Check Firestore rules.',true);
+  }
+  if(ok)lbArmSubmitCooldown(btnEl);
+  else{
+    btnEl.disabled=false;
+    if(btnEl.dataset.lbOrigText)btnEl.textContent=btnEl.dataset.lbOrigText;
+  }
+}
+
+function lbCompareRows(a,b){
+  const pp=(b.prestige||0)-(a.prestige||0);
+  if(pp!==0)return pp;
+  const pl=(b.puddleLevel||0)-(a.puddleLevel||0);
+  if(pl!==0)return pl;
+  return (b.score||0)-(a.score||0);
+}
+
+// Single fetch + client sort — no composite index, no console spam from failed orderBy.
+async function lbFetchSnapshot(){
+  return lbDb.collection('leaderboard').limit(500).get();
+}
+
+async function lbLoadRows(listEl,msgEl){
+  if(!listEl)return;
+  if(!firebaseReady()){
+    listEl.textContent='Paste FIREBASE_CONFIG in index.html (apiKey + projectId).';
+    return;
+  }
+  if(lbRefreshing)return;
+  lbRefreshing=true;
+  listEl.innerHTML='';
+  try{
+    lbInitApp();
+    let snap;
+    try{
+      snap=await lbFetchSnapshot();
+    }catch(e1){
+      const perm=e1&&e1.code==='permission-denied';
+      if(perm){
+        // Rules often use allow read: if request.auth != null — sign in, then retry.
+        try{
+          await lbEnsureUser();
+          snap=await lbFetchSnapshot();
+        }catch(e2){
+          if(e2&&(e2.code==='auth/configuration-not-found'||e2.code&&String(e2.code).startsWith('auth/')))throw e2;
+          throw e1;
+        }
+      }else{
+        throw e1;
+      }
+    }
+    let rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+    rows.sort(lbCompareRows);
+    if(rows.length>50)rows=rows.slice(0,50);
+    if(!lbAuthUid){
+      const u=firebase.auth().currentUser;
+      if(u)lbAuthUid=u.uid;
+    }
+    const head=document.createElement('div');
+    head.className='lb-head';
+    head.innerHTML='<div class="lb-rank">#</div><div>Name</div><div class="lb-num">Score</div><div class="lb-num">Lvl</div><div class="lb-num">Pre</div>';
+    listEl.appendChild(head);
+    rows.forEach((r,i)=>{
+      const row=document.createElement('div');
+      row.className='lb-row'+(r.id===lbAuthUid?' you':'');
+      row.setAttribute('data-doc-id',r.id);
+      const rank=document.createElement('div');rank.className='lb-rank';rank.textContent=String(i+1);
+      const nm=document.createElement('div');nm.className='lb-pname';nm.textContent=r.name||'—';
+      const sc=document.createElement('div');sc.className='lb-num score';sc.textContent=fmt(r.score||0);
+      const lv=document.createElement('div');lv.className='lb-num lvl';lv.textContent=String(Math.floor(r.puddleLevel||1));
+      const pr=document.createElement('div');pr.className='lb-num prest';pr.textContent=String(Math.floor(r.prestige||0));
+      row.appendChild(rank);row.appendChild(nm);row.appendChild(sc);row.appendChild(lv);row.appendChild(pr);
+      listEl.appendChild(row);
+    });
+    if(rows.length===0){
+      const empty=document.createElement('div');
+      empty.className='lb-hint';
+      empty.style.marginTop='6px';
+      empty.textContent='No scores in the database yet. After Anonymous sign-in works, enter a name and tap Submit stats.';
+      listEl.appendChild(empty);
+    }
+  }catch(e){
+    console.warn(e);
+    if(e&&(e.code==='auth/configuration-not-found'||String(e.code||'').startsWith('auth/'))){
+      listEl.textContent=lbAuthErrMsg(e);
+    }else if(e&&e.code==='permission-denied'){
+      listEl.textContent='Firestore blocked reads. Open Firestore → Rules, use allow read: if true on leaderboard/{userId}, Publish. Or turn off App Check enforcement for Firestore while testing.';
+    }else{
+      listEl.textContent='Could not load leaderboard. Check the browser console.';
+    }
+  }
+  lbRefreshing=false;
+}
+
+function buildLeaderboardTab(){
+  lbClearSubmitCooldownTimer();
+  const el=$('tab-board');
+  el.innerHTML='';
+  const hint=document.createElement('div');
+  hint.className='lb-hint';
+  el.appendChild(hint);
+
+  const nameLbl=document.createElement('div');
+  nameLbl.className='sec-lbl';
+  nameLbl.style.marginTop='4px';
+  nameLbl.textContent='Your display name';
+  el.appendChild(nameLbl);
+  const nameHint=document.createElement('div');
+  nameHint.className='lb-hint';
+  nameHint.textContent='Saved on this device with your game';
+  el.appendChild(nameHint);
+
+  const nameInp=document.createElement('input');
+  nameInp.type='text';
+  nameInp.className='lb-field';
+  nameInp.id='lb-player-name';
+  nameInp.name='player_display_name';
+  nameInp.setAttribute('autocomplete','nickname');
+  nameInp.setAttribute('spellcheck','false');
+  nameInp.setAttribute('maxlength',String(PLAYER_NAME_MAX));
+  nameInp.setAttribute('aria-label','Leaderboard display name');
+  nameInp.placeholder='e.g. Toeffe';
+  nameInp.value=playerName||'';
+  const persistNameQuiet=debounce(()=>{
+    playerName=sanitizePlayerName(nameInp.value);
+    saveGame(true);
+  },400);
+  nameInp.addEventListener('input',persistNameQuiet);
+  nameInp.addEventListener('blur',()=>{
+    persistNameQuiet.cancel();
+    const v=sanitizePlayerName(nameInp.value);
+    playerName=v;
+    if(nameInp.value!==v)nameInp.value=v;
+    saveGame();
+  });
+  el.appendChild(nameInp);
+
+  const msg=document.createElement('div');
+  msg.className='lb-msg';
+  el.appendChild(msg);
+
+  const actions=document.createElement('div');
+  actions.className='lb-actions';
+  const sub=document.createElement('button');
+  sub.type='button';
+  sub.className='lb-btn';
+  sub.textContent='Submit stats';
+  sub.dataset.lbOrigText='Submit stats';
+  actions.appendChild(sub);
+  el.appendChild(actions);
+
+  const list=document.createElement('div');
+  list.setAttribute('aria-live','polite');
+  el.appendChild(list);
+
+  if(!firebaseReady()){
+    msg.textContent='Add Firebase web app config to FIREBASE_CONFIG, enable Firestore + Anonymous auth.';
+    msg.className='lb-msg err';
+    return;
+  }
+
+  sub.addEventListener('click',()=>lbSubmit(nameInp,msg,list,sub));
+  lbSyncSubmitButtonIfCoolingDown(sub);
+
+  // One Firestore read per tab open; then sign in (for “you” row) and update highlight only.
+  (async()=>{
+    msg.textContent='Loading…';
+    await lbLoadRows(list,msg);
+    msg.textContent='';
+    try{
+      await lbEnsureUser();
+    }catch(e){
+      console.warn(e);
+      msg.textContent='Leaderboard loaded. Enable Anonymous sign-in (Firebase Console) to submit your score.';
+      msg.className='lb-msg err';
+    }
+    lbApplyYouHighlight(list);
+  })();
 }
 
 // ════════════════════════════════════════════════════════
@@ -646,10 +995,6 @@ function resize(){
     }
   }
 }
-canvas.width=window.innerWidth-PANEL_W();
-canvas.height=visH();
-canvas.style.width=(window.innerWidth-PANEL_W())+'px';
-canvas.style.height=visH()+'px';
 window.addEventListener('resize',resize);
 if(window.visualViewport) window.visualViewport.addEventListener('resize',resize);
 
@@ -657,7 +1002,25 @@ if(window.visualViewport) window.visualViewport.addEventListener('resize',resize
 // SAVE / LOAD
 // ════════════════════════════════════════════════════════
 const SAVE_KEY='viscosity_v1';
-function saveGame(){
+const PLAYER_NAME_MAX=28;
+let playerName='';
+
+function sanitizePlayerName(s){
+  return String(s==null?'':s).trim().replace(/[<>]/g,'').slice(0,PLAYER_NAME_MAX);
+}
+
+function debounce(fn,ms){
+  let t=0;
+  const wrap=function(...a){
+    clearTimeout(t);
+    t=setTimeout(()=>{t=0;fn.apply(this,a);},ms);
+  };
+  wrap.cancel=function(){clearTimeout(t);t=0;};
+  return wrap;
+}
+
+/** quiet=true: write save but skip HUD flash (typing display name). */
+function saveGame(quiet){
   const d={
     score:S.score,driplets:S.driplets,lifeDrip:S.lifeDrip,
     totalSpent:S.totalSpent,puddleLevel:S.puddleLevel,
@@ -668,12 +1031,25 @@ function saveGame(){
     autodrainOn:!!S.autodrainOn,
     upgrades:S.upgrades,liquids:S.liquids,hoses:S.hoses,
     achievements:S.achievements,
+    playerName:playerName||'',
   };
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}
-  const ind=$('save-ind');
-  ind.style.color='#00e676';ind.textContent='⬡ saved';
-  setTimeout(()=>{ind.style.color='';ind.textContent='⬡ auto-save';},1500);
+  if(!quiet){
+    const ind=$('save-ind');
+    ind.style.color='#00e676';ind.textContent='⬡ saved';
+    setTimeout(()=>{ind.style.color='';ind.textContent='⬡ auto-save';},1500);
+  }
 }
+
+function syncPlayerNameFromBoardInput(){
+  const el=$('lb-player-name');
+  if(!el)return;
+  const v=sanitizePlayerName(el.value);
+  if(v===playerName)return;
+  playerName=v;
+  saveGame(true);
+}
+
 function loadGame(){
   try{
     const raw=localStorage.getItem(SAVE_KEY);
@@ -694,8 +1070,14 @@ function loadGame(){
     if(d.liquids)Object.assign(S.liquids,d.liquids);
     if(d.hoses)Object.assign(S.hoses,d.hoses);
     if(d.achievements)Object.assign(S.achievements,d.achievements);
+    playerName=sanitizePlayerName(d.playerName)||'';
   }catch(e){console.warn('Load failed',e);}
 }
+
+window.addEventListener('pagehide',syncPlayerNameFromBoardInput);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')syncPlayerNameFromBoardInput();
+});
 
 // ════════════════════════════════════════════════════════
 // GAME HELPERS
@@ -1425,6 +1807,7 @@ function switchTab(t, btn){
   btn.classList.add('active');
   $('tab-'+t).style.display='block';
   if(t==='ach')buildAchTab();
+  if(t==='board')buildLeaderboardTab();
 }
 
 function buildShop(){
@@ -1711,22 +2094,31 @@ window.addEventListener('touchend',()=>{S.mouseHeld=false;});
 })();
 
 // ════════════════════════════════════════════════════════
-// INIT & LOOP
+// INIT & LOOP (after window load — avoids layout forced before CSS/fonts)
 // ════════════════════════════════════════════════════════
-loadGame();
-beginPuddleFillCycle();
-S.hoseBaseX=canvas.width/2;
-S.hoseBaseY=-10;
-S.nozzleX=canvas.width/2;
-S.nozzleY=S.hoseBaseY+S.hoseLen;
-S.mouseX=canvas.width/2;
-S.puddle.x=canvas.width/2;
-S.puddle.y=groundY();
-
-buildShop();updateHUD();checkMilestones();
-
 function loop(ts){update(ts);draw();requestAnimationFrame(loop);}
-requestAnimationFrame(loop);
+function startGame(){
+  resize();
+  loadGame();
+  beginPuddleFillCycle();
+  S.hoseBaseX=canvas.width/2;
+  S.hoseBaseY=-10;
+  S.nozzleX=canvas.width/2;
+  S.nozzleY=S.hoseBaseY+S.hoseLen;
+  S.mouseX=canvas.width/2;
+  S.puddle.x=canvas.width/2;
+  S.puddle.y=groundY();
+  buildShop();updateHUD();checkMilestones();
+  requestAnimationFrame(loop);
+}
+function scheduleStart(){
+  const go=()=>requestAnimationFrame(startGame);
+  if(document.fonts&&document.fonts.ready)
+    document.fonts.ready.then(go).catch(go);
+  else go();
+}
+if(document.readyState==='complete')scheduleStart();
+else window.addEventListener('load',scheduleStart);
 </script>
 </body>
 </html>

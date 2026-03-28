@@ -1,0 +1,25 @@
+rules_version = '2';
+// Deploy: Firebase Console → Firestore Database → Rules → paste → Publish
+// Or: firebase deploy --only firestore:rules (with firebase.json in this folder)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Leaderboard: public read (no sign-in). If you omit this, only signed-in users can list scores.
+    match /leaderboard/{userId} {
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasAll(['name', 'score', 'puddleLevel', 'prestige'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 28
+        && request.resource.data.score is number
+        && request.resource.data.puddleLevel is number
+        && request.resource.data.prestige is number
+        && request.resource.data.score >= 0
+        && request.resource.data.puddleLevel >= 1
+        && request.resource.data.prestige >= 0;
+    }
+  }
+}
