@@ -904,7 +904,7 @@ const ACHIEVEMENTS = [
   {id:'drip1vg',     name:'Vigintadrip',            desc:'Earn 1 Vigintillion total driplets',       check:s=>s.lifeDrip>=1e63},
   {id:'drip1tg',     name:'Trigintadrip',           desc:'Earn 1 Trigintillion total driplets',      check:s=>s.lifeDrip>=1e93},
   {id:'drip1centil', name:'Centillionaire',         desc:'Earn 1 Centillion total driplets',         check:s=>s.lifeDrip>=1e303},
-  {id:'drip_beyond', name:'Beyond Counting',        desc:'Numbers have lost all meaning',            check:s=>s.lifeDrip>=1e300},
+  {id:'drip_beyond', name:'Beyond Counting',        desc:'Earn driplets past a centillion',          check:s=>s.lifeDrip>=1e304},
 
   // ── Score milestones ──────────────────────────────────────────────────────
   {id:'score1m',     name:'Scoreboard Entry',       desc:'Reach a score of 1 Million',               check:s=>s.score>=1e6},
@@ -936,18 +936,18 @@ const ACHIEVEMENTS = [
   {id:'drain100k',   name:'The Endless Drain',      desc:'Drain 25,000 puddles',                   check:s=>s.puddlesDone>=25000},
   {id:'drain1m',     name:'Drain Dimension',        desc:'Drain 150,000 puddles',                  check:s=>s.puddlesDone>=150000},
   {id:'drain10m',    name:'Sisyphus Had It Easy',   desc:'Drain 1,000,000 puddles',                check:s=>s.puddlesDone>=1e6},
-  {id:'drain1b',     name:'The Eternal Plumber',    desc:'Drain 25 Million puddles',               check:s=>s.puddlesDone>=25e6},
+  {id:'drain1b',     name:'The Eternal Plumber',    desc:'Drain 500,000 puddles (lifetime)',         check:s=>s.puddlesDone>=5e5},
 
-  // ── Puddle levels ─────────────────────────────────────────────────────────
-  {id:'level10',     name:'Getting Serious',        desc:'Reach puddle level 10',                    check:s=>s.puddleLevel>=10},
-  {id:'level100',    name:'Century Puddle',         desc:'Reach puddle level 100',                   check:s=>s.puddleLevel>=100},
-  {id:'level1k',     name:'Millennium',             desc:'Reach puddle level 1,000',                 check:s=>s.puddleLevel>=1000},
-  {id:'level10k',    name:'Epoch',                  desc:'Reach puddle level 10,000',                check:s=>s.puddleLevel>=10000},
-  {id:'level100k',   name:'Deep Time',              desc:'Reach puddle level 100,000',               check:s=>s.puddleLevel>=100000},
-  {id:'level1m',     name:'The Infinite Puddle',    desc:'Reach puddle level 1,000,000',             check:s=>s.puddleLevel>=1000000},
-  {id:'level1b',     name:'Geological Scale',       desc:'Reach puddle level 1 Billion',             check:s=>s.puddleLevel>=1e9},
-  {id:'level1t',     name:'Cosmic Time',            desc:'Reach puddle level 1 Trillion',            check:s=>s.puddleLevel>=1e12},
-  {id:'level1qi',    name:'Heat Death Approach',    desc:'Reach puddle level 1 Quintillion',         check:s=>s.puddleLevel>=1e18},
+  // ── Puddle levels (lifeMaxPuddleLevel = deepest level in any run; not reset by prestige) ──
+  {id:'level10',     name:'Getting Serious',        desc:'Reach puddle level 10',                    check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=10},
+  {id:'level100',    name:'Century Puddle',         desc:'Reach puddle level 100',                   check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=100},
+  {id:'level1k',     name:'Millennium',             desc:'Reach puddle level 1,000',                 check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=1000},
+  {id:'level10k',    name:'Epoch',                  desc:'Reach puddle level 10,000',                check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=10000},
+  {id:'level100k',   name:'Deep Time',              desc:'Reach puddle level 100,000',               check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=100000},
+  {id:'level1m',     name:'The Infinite Puddle',    desc:'Reach puddle level 150,000',               check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=150000},
+  {id:'level1b',     name:'Geological Scale',       desc:'Reach puddle level 200,000',               check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=200000},
+  {id:'level1t',     name:'Cosmic Time',            desc:'Reach puddle level 300,000',               check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=300000},
+  {id:'level1qi',    name:'Heat Death Approach',    desc:'Reach puddle level 500,000',               check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=500000},
 
   // ── Combo ─────────────────────────────────────────────────────────────────
   {id:'combo10',     name:'On Fire',                desc:'Hit a ×10 combo on the puddle',            check:s=>s.maxCombo>=10},
@@ -958,8 +958,9 @@ const ACHIEVEMENTS = [
   {id:'combo5k',     name:'Transcendent Wiggler',   desc:'Hit a ×5,000 combo',                       check:s=>s.maxCombo>=5000},
   {id:'combo10k',    name:'Beyond Human',           desc:'Hit a ×10,000 combo',                      check:s=>s.maxCombo>=10000},
   {id:'combo100k',   name:'One With The Hose',      desc:'Hit a ×100,000 combo',                     check:s=>s.maxCombo>=100000},
+  {id:'combo1b',     name:'Combo Deity',            desc:'Hit a ×150,000 combo',                     check:s=>s.maxCombo>=150000},
+  {id:'combo1t',     name:'The Last Number',        desc:'Hit a ×250,000 combo',                     check:s=>s.maxCombo>=250000},
   {id:'combo1m',     name:'Combo Singularity',      desc:'×1,000,000 combo — are you even real?',    check:s=>s.maxCombo>=1000000},
-  {id:'combo1b',     name:'Combo Deity',            desc:'×1 Billion combo. Seek help.',             check:s=>s.maxCombo>=1e9},
 
   // ── Pipes ─────────────────────────────────────────────────────────────────
   {id:'pipe2',       name:'Upgrade Day',            desc:'Buy your first pipe upgrade',              check:s=>Object.values(s.hoses).filter(Boolean).length>=2},
@@ -998,13 +999,12 @@ const ACHIEVEMENTS = [
   {id:'heartbreaker500',name:'Serial Heartbreaker',   desc:'Break a ×500+ combo with a miss',          check:s=>s._brokeCombo500>=1},
   {id:'heartbreaker10k',name:'Combo Murderer',        desc:'Break a ×10,000+ combo with a miss',       check:s=>s._brokeCombo10k>=1},
 
-  // ── The impossible tier ───────────────────────────────────────────────────
+  // ── Endgame tier (past main ladders; harder than prior step in each track) ─
   {id:'drip1e100',   name:'Googoldrip',              desc:'Earn a googol (1e100) total driplets',     check:s=>s.lifeDrip>=1e100},
-  {id:'level1e15',   name:'Eon Runner',              desc:'Reach puddle level 1 Quadrillion',         check:s=>s.puddleLevel>=1e15},
-  {id:'drain1t',     name:'The Infinite Drain',      desc:'Drain 500 Million puddles — truly endless', check:s=>s.puddlesDone>=5e8},
-  {id:'spent1e30',   name:'Post-Scarcity God',       desc:'Spend 1 Nonillion driplets total',         check:s=>s.totalSpent>=1e30},
-  {id:'combo1t',     name:'The Last Number',         desc:'Hit a ×1 Trillion combo',                  check:s=>s.maxCombo>=1e12},
-  {id:'score1e30',   name:'Score Singularity',       desc:'Reach a score of 1 Nonillion',             check:s=>s.score>=1e30},
+  {id:'level1e15',   name:'Eon Runner',              desc:'Reach puddle level 750,000 (lifetime best)', check:s=>(s.lifeMaxPuddleLevel||s.puddleLevel)>=750000},
+  {id:'drain1t',     name:'The Infinite Drain',      desc:'Drain 3 Million puddles (lifetime)',        check:s=>s.puddlesDone>=3e6},
+  {id:'spent1e30',   name:'Post-Scarcity God',       desc:'Spend 1 Undecillion driplets total',       check:s=>s.totalSpent>=1e36},
+  {id:'score1e30',   name:'Score Singularity',       desc:'Reach a score of 1 Undecillion',           check:s=>s.score>=1e36},
   {id:'all_achs',    name:'∞ The True Completionist',desc:'Unlock every other achievement. You win.',  check:s=>ACHIEVEMENTS.filter(a=>a.id!=='all_achs').every(a=>s.achievements[a.id])},
 ];
 
@@ -1015,7 +1015,7 @@ const S = {
   score:0, driplets:0, lifeDrip:0, totalSpent:0,
   prestigeCount:0,
   autodrainOn:true,
-  puddleLevel:1, puddlesDone:0, maxCombo:0,
+  puddleLevel:1, lifeMaxPuddleLevel:1, puddlesDone:0, maxCombo:0,
   combo:0, comboTimer:0,
   _totalMisses:0, _zenPuddle:0, _fastPuddle:0, _autoPuddle:0,
   _brokeCombo100:0, _brokeCombo500:0, _brokeCombo10k:0,
@@ -1118,7 +1118,7 @@ function debounce(fn,ms){
 function saveGame(quiet){
   const d={
     score:S.score,driplets:S.driplets,lifeDrip:S.lifeDrip,
-    totalSpent:S.totalSpent,puddleLevel:S.puddleLevel,
+    totalSpent:S.totalSpent,puddleLevel:S.puddleLevel,lifeMaxPuddleLevel:S.lifeMaxPuddleLevel||S.puddleLevel,
     puddlesDone:S.puddlesDone,maxCombo:S.maxCombo,
     puddleRadius:S.puddle.radius,puddleMaxRadius:S.puddle.maxRadius,
     currentLiquid:S.currentLiquid,currentHose:S.currentHose,
@@ -1154,6 +1154,7 @@ function loadGame(){
     S.lifeDrip=d.lifeDrip||0;S.totalSpent=d.totalSpent||0;
     S.puddleLevel=d.puddleLevel||1;S.puddlesDone=d.puddlesDone||0;
     S.maxCombo=d.maxCombo||0;
+    S.lifeMaxPuddleLevel=Math.max(d.lifeMaxPuddleLevel||1,d.puddleLevel||1,S.puddleLevel);
     S.puddle.radius=d.puddleRadius||25;
     S.puddle.maxRadius=d.puddleMaxRadius||200;
     S.currentLiquid=d.currentLiquid||'water';
@@ -1476,6 +1477,7 @@ function update(ts){
         triggerDrainFX();
         S.shake=12;
         S.puddleLevel++;
+        S.lifeMaxPuddleLevel=Math.max(S.lifeMaxPuddleLevel||1,S.puddleLevel);
         S.puddle.maxRadius=clamp(200+S.puddleLevel*6,200,350);
         S.puddle.radius=25;S.plug=null;
         beginPuddleFillCycle();
