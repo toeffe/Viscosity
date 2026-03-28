@@ -703,7 +703,7 @@ function buildLeaderboardTab(){
   nameInp.setAttribute('spellcheck','false');
   nameInp.setAttribute('maxlength',String(PLAYER_NAME_MAX));
   nameInp.setAttribute('aria-label','Leaderboard display name');
-  nameInp.placeholder='e.g. Toeffe';
+  nameInp.placeholder='e.g. ThatDripGuy';
   nameInp.value=playerName||'';
   const persistNameQuiet=debounce(()=>{
     playerName=sanitizePlayerName(nameInp.value);
